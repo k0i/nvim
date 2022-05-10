@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/nvim-lua/completion-nvim/autoload/health/completion_nvim.vim

@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/neovim/nvim-lspconfig/plugin/lspconfig.vim

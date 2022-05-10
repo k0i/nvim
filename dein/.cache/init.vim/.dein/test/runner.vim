@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/airblade/vim-gitgutter/test/runner.vim

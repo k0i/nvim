@@ -1,0 +1,615 @@
+[[plugins]]
+repo = 'mfussenegger/nvim-dap'
+on_lua= 'dap'
+hook_add = '''
+lua <<EOF
+local dap = require 'dap'
+vim.fn.sign_define('DapBreakpoint', {text='🤔', texthl='', linehl='', numhl=''})
+vim.fn.sign_define('DapStopped', {text='✔️', texthl='', linehl='', numhl=''})
+EOF
+'''
+[[plugins]]
+repo = 'rcarriga/nvim-dap-ui'
+depends = ['nvim-dap']
+on_lua = 'dapui'
+hook_add = '''
+lua <<EOF
+require('dap.ext.vscode').load_launchjs()
+require("dapui").setup({
+  icons = { expanded = "-", collapsed = "+" },
+  sidebar = {
+    elements = {
+      { id = "watches", size = 0.00 },
+      { id = "breakpoints", size = 0.2},
+      {
+        id = "scopes",
+        size = 0.8, 
+
+      },
+      { id = "stacks", size = 0.0},
+    },
+    size = 100
+    ,
+    position = "right",
+  },
+  tray = {
+    elements = { "repl" },
+    size = 10,
+    position = "top",
+  },
+   floating = {
+    max_height = 0.8,
+    max_width = 0.9,
+    border = "rounded",
+    mappings = {
+      close = { "q", "<Esc>" },
+    },
+  },
+  windows = { indent = 1 },
+})
+local dap, dapui = require("dap"), require("dapui")
+dap.listeners.after.event_initialized["dapui_config"] = function()
+  dapui.open()
+end
+dap.listeners.before.event_terminated["dapui_config"] = function()
+  dapui.close()
+end
+dap.listeners.before.event_exited["dapui_config"] = function()
+  dapui.close()
+end
+EOF
+'''
+[[plugins]]
+repo = 'nvim-lua/plenary.nvim'
+[[plugins]]
+repo = 'leoluz/nvim-dap-go'
+depends = ['plenary.nvim','nvim-dap']
+on_lua = 'dap-go'
+hook_add = '''
+lua << EOF
+local dap = require 'dap'
+require('dap-go').setup()
+dap.adapters.go = function(callback, config)
+   local stdout = vim.loop.new_pipe(false)
+   local handle
+   local pid_or_err
+   local port = 38697
+   local opts = {
+      stdio = { nil, stdout },
+      args = { "dap", "-l", "127.0.0.1:" .. port },
+      detached = true
+   }
+   handle, pid_or_err = vim.loop.spawn("dlv", opts, function(code)
+      stdout:close()
+      handle:close()
+      if code ~= 0 then
+         print('dlv exited with code', code)
+      end
+   end)
+   assert(handle, 'Error running dlv: ' .. tostring(pid_or_err))
+   stdout:read_start(function(err, chunk)
+      assert(not err, err)
+      if chunk then
+         vim.schedule(function()
+            require('dap.repl').append(chunk)
+         end)
+      end
+   end)
+   -- Wait for delve to start
+   vim.defer_fn(
+      function()
+         callback({ type = "server", host = "127.0.0.1", port = port })
+      end,
+      100)
+end
+dap.configurations.go = {
+   {
+      type = "go",
+      name = "nttd",
+      request = "launch",
+      showLog = false,
+      dlvToolPath = "/home/koyam/go/bin/dlv",
+      program = "${workspaceFolder}/main.go",
+      args = { "server", "start" },
+   },
+   {
+      type = "go",
+      name = "test_nttd",
+      request = "launch",
+      showLog = false,
+      mode = "test",
+      dlvToolPath = "/home/koyam/go/bin/dlv",
+      program = "${workspaceFolder}/main.go",
+      args = { "server", "start" },
+   },
+   {
+      type = "go",
+      name = "priv",
+      request = "launch",
+      showLog = false,
+      dlvToolPath = "/home/koyam/go/bin/dlv",
+      program = "${workspaceFolder}/main.go",
+   },
+}
+EOF
+'''
+
+[[plugins]]
+repo ='simrat39/rust-tools.nvim'
+on_ft="rust"
+depends = ['plenary.nvim','nvim-dap','nvim-cmp']
+hook_post_source='''
+lua <<EOF
+local on_attach = function(client, bufnr)
+   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+   local opts = { noremap = true, silent = true }
+    cfg ={
+     hint_prefix = "ПФ 🤔 : ", 
+     transparency = 30,
+   }
+   require "lsp_signature".on_attach(cfg,bufnr)
+   buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+   buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+   buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+   buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+   buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+   buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+   buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+   buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+   buf_set_keymap("n", "<F5>", "<cmd>RustDebuggables<CR>", opts)
+   buf_set_keymap('n', '<Leader>p', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
+   buf_set_keymap('n', '<Leader>n', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+   buf_set_keymap("n", "<Leader>s", "<cmd>lua require'rust-tools.hover_actions'.hover_actions()<CR>", opts)
+   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+end
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
+vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
+   vim.lsp.diagnostic.on_publish_diagnostics, {
+      virtual_text = false,
+      signs = true,
+      update_in_insert = true,
+   }
+)
+local extension_path = '/home/koyam/.vscode-server/extensions/vadimcn.vscode-lldb-1.7.0/'
+local codelldb_path = extension_path .. 'adapter/codelldb'
+local liblldb_path = extension_path .. 'lldb/lib/liblldb.so'
+local opts = {
+   tools = {
+      autoSetHints = false,
+      hover_with_actions = true,
+      executor = require("rust-tools/executors").termopen,
+      inlay_hints = {
+         only_current_line = false,
+	 show_variable_name = true,
+	 right_align= true,
+	 right_align_padding = 7,
+         other_hints_prefix = "::",
+         parameter_hints_prefix = "<=",
+      },
+      hover_actions ={
+        auto_focus  = true,
+      }
+   },
+   dap = {
+        adapter = require('rust-tools.dap').get_codelldb_adapter(
+            codelldb_path, liblldb_path)
+   },
+   server = {
+      on_attach = on_attach,
+      capabilities = capabilities,
+      settings = {
+         ["rust-analyzer"] = {
+            checkOnSave = {
+               command = "clippy"
+            },
+         }
+      }
+   },
+}
+require('rust-tools').setup(opts)
+EOF
+'''
+[[plugins]]
+repo = 'hrsh7th/cmp-nvim-lsp'
+[[plugins]]
+repo = 'hrsh7th/cmp-buffer'
+[[plugins]]
+repo = 'hrsh7th/cmp-path'
+[[plugins]]
+repo = 'onsails/lspkind.nvim'
+[[plugins]]
+repo = 'hrsh7th/cmp-cmdline'
+[[plugins]]
+repo = 'ray-x/lsp_signature.nvim'
+[[plugins]]
+repo = 'hrsh7th/nvim-cmp'
+depends = ['nvim-lspconfig', 'cmp-nvim-lsp', 'cmp-buffer','cmp-path','cmp-cmdline','lspkind.nvim','lsp_signature.nvim']
+on_lua = "cmp"
+rev = "bba6fb67fdafc0af7c5454058dfbabc2182741f4"
+hook_add = """
+lua <<EOF
+local cmp = require'cmp'
+local lspkind = require('lspkind')
+cmp.setup({
+   snippet = {
+      expand = function(args)
+         vim.fn["vsnip#anonymous"](args.body)
+      end,
+   },
+  formatting = {
+    format = lspkind.cmp_format({
+      mode = 'symbol', 
+      maxwidth = 100,
+      before = function (entry, vim_item)
+        return vim_item
+      end
+      })
+    },
+   mapping = cmp.mapping.preset.insert({
+      ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      ['<C-Space>'] = cmp.mapping.complete(),
+      ['<C-e>'] = cmp.mapping.abort(),
+      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+   }),
+  sources = cmp.config.sources({
+      { name = 'nvim_lsp' },
+      { name = 'vsnip' },
+      {
+        { name = 'buffer' }
+      }
+   }),
+})
+cmp.setup.cmdline('/', {
+      mapping = cmp.mapping.preset.cmdline(),
+      sources = {
+        { name = 'buffer' }
+      }
+})
+cmp.setup.cmdline(':', {
+      mapping = cmp.mapping.preset.cmdline(),
+      sources = cmp.config.sources({
+        { name = 'path' }
+      }, {
+        { name = 'cmdline' }
+      })
+})
+local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+local lspconfig = require('lspconfig')
+local servers = { 'tsserver', 'gopls','rust_analyzer' }
+local on_attach = function(client, bufnr)
+   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+   local opts = { noremap = true, silent = true }
+   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+   buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+   buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+   buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+   buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+   buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+   buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+   buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+   buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+   buf_set_keymap("n", "<F5>", "<cmd>lua require'dap'.continue()<CR>", opts)
+   buf_set_keymap('n', '<Leader>p', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
+   buf_set_keymap('n', '<Leader>n', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+   buf_set_keymap("n", "<Leader>s", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
+   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+   cfg ={
+     hint_prefix = "ПФ 🤔 : ", 
+     transparency = 30,
+   }
+   require "lsp_signature".on_attach(cfg,bufnr)
+
+end
+for _, lsp in ipairs(servers) do
+   lspconfig[lsp].setup {
+      on_attach = on_attach,
+      capabilities = capabilities,
+   }
+end
+EOF
+"""
+[[plugins]]
+repo = 'kyazdani42/nvim-web-devicons'
+[[plugins]]
+repo ='folke/trouble.nvim'
+on_lua ='trouble'
+depends =['nvim-web-devicons']
+hook_add="""
+lua << EOF
+require("trouble").setup({
+    position = "top",
+    height = 20,
+})
+EOF
+"""
+[[plugins]]
+repo = 'folke/twilight.nvim'
+depends =['nvim-treesitter']
+[[plugins]]
+repo = 'vim-test/vim-test'
+hook_add="""
+"""
+[[plugins]]
+repo = 'rcarriga/vim-ultest'
+depends = ['vim-test']
+on_lua = 'ultest'
+hook_add="""
+let g:test#go#runner = 'gotest'
+let test#go#gotest#options = '--color=always'
+let g:ultest_use_pty = 1
+let g:test#strategy = 'neovim'
+"""
+[[plugins]]
+repo = 'folke/lsp-colors.nvim'
+on_lua = 'lsp_colors'
+on_add ="""
+lua << EOF
+require("lsp-colors").setup({
+  Error = "#db4b4b",
+  Warning = "#e0af68",
+  Information = "#0db9d7",
+  Hint = "#10B981"
+})
+EOF
+"""
+[[plugins]]
+repo = 'ray-x/go.nvim'
+depends = ['nvim-treesitter']
+on_ft="go"
+on_lua = 'go'
+on_add ="""
+lua << EOF
+require('go').setup()
+EOF
+"""
+[[plugins]]
+repo = 'theHamsta/nvim-dap-virtual-text'
+depends = ['nvim-treesitter','dap']
+on_lua = 'nvim-dap-virtual-text'
+on_add ="""
+lua <<EOF
+require("nvim-dap-virtual-text").setup()
+EOF
+"""
+[[plugins]]
+repo ='cespare/vim-toml'
+on_ft='toml'
+[[plugins]]
+repo = 'itchyny/vim-gitbranch'
+[[plugins]]
+repo = 'j-hui/fidget.nvim'
+on_lua = 'fidget'
+hook_add ="""
+lua << EOF
+require"fidget".setup{}
+EOF
+"""
+[[plugins]]
+repo = 'm-demare/hlargs.nvim'
+on_lua = 'hlargs'
+depends = ['nvim-treesitter']
+hook_add ="""
+lua << EOF
+require('hlargs').setup{}
+EOF
+"""
+[[plugins]]
+repo = 'Pocco81/HighStr.nvim'
+on_lua = 'high-str'
+hook_add ="""
+lua << EOF
+local high_str = require("high-str")
+high_str.setup({
+	verbosity = 0,
+	saving_path = "/tmp/highstr/",
+	highlight_colors = {
+		-- color_id = {"bg_hex_code",<"fg_hex_code"/"smart">}
+		color_0 = {"#0c0d0e", "smart"},	-- Cosmic charcoal
+		color_1 = {"#e2c4ff", "smart"},
+		color_2 = {"#7FFFD4", "smart"},	-- Aqua menthe
+		color_3 = {"#8A2BE2", "smart"},	-- Proton purple
+		color_4 = {"#FF4500", "smart"},	-- Orange red
+		color_5 = {"#008000", "smart"},	-- Office green
+		color_6 = {"#0000FF", "smart"},	-- Just blue
+		color_7 = {"#FFC0CB", "smart"},	-- Blush pink
+		color_8 = {"#FFF9E3", "smart"},	-- Cosmic latte
+		color_9 = {"#7d5c34", "smart"},	-- Fallow brown
+	}
+})
+vim.api.nvim_set_keymap(
+    "v",
+    "<F2>",
+    ":<c-u>HSHighlight 1<CR>",
+    {
+        noremap = true,
+        silent = true
+    }
+)
+vim.api.nvim_set_keymap(
+    "v",
+    "<F3>",
+    ":<c-u>HSHighlight 2<CR>",
+    {
+        noremap = true,
+        silent = true
+    }
+)
+
+vim.api.nvim_set_keymap(
+    "v",
+    "<F4>",
+    ":<c-u>HSRmHighlight rm_all<CR>",
+    {
+        noremap = true,
+        silent = true
+    }
+)
+EOF
+"""
+[[plugins]]
+repo = 'mvllow/modes.nvim'
+on_lua = 'modes'
+hook_add ="""
+lua << EOF
+require('modes').setup{
+colors = {
+		copy = "#59f5de",
+		delete = "#f5aec8",
+		insert = "#ccffb0",
+		visual = "#de99ff",
+	},
+	line_opacity = 0.4,
+}
+EOF
+"""
+[[plugins]]
+repo = 'edluffy/specs.nvim'
+on_lua = 'specs'
+hook_add ="""
+lua << EOF
+require('specs').setup{ 
+    show_jumps  = true,
+    min_jump = 10,
+    popup = {
+        delay_ms = 0,
+        inc_ms = 10,
+        blend = 50,
+        width = 50,
+        winhl = "PMenu",
+        fader = require('specs').pulse_fader,
+        resizer = require('specs').shrink_resizer
+    },
+    ignore_filetypes = {},
+    ignore_buftypes = {
+        nofile = true,
+    },
+}
+EOF
+"""
+[[plugins]]
+repo = 'rmagatti/goto-preview'
+on_lua = 'goto-preview'
+hook_add ="""
+lua << EOF
+require('goto-preview').setup{}
+EOF
+"""
+[[plugins]]
+repo = 'simrat39/symbols-outline.nvim'
+on_lua = 'symbols_outline'
+hook_add ="""
+lua << EOF
+vim.g.symbols_outline = {
+    highlight_hovered_item = true,
+    show_guides = true,
+    auto_preview = true,
+    position = 'left',
+    relative_width = true,
+    width = 30,
+    auto_close = false,
+    show_numbers = false,
+    show_relative_numbers = false,
+    show_symbol_details = true,
+    preview_bg_highlight = 'Pmenu',
+    keymaps = { -- These keymaps can be a string or a table for multiple keys
+        close = {"<Esc>", "q"},
+        goto_location = "<Cr>",
+        focus_location = "o",
+        hover_symbol = "<C-space>",
+        toggle_preview = "K",
+        rename_symbol = "r",
+        code_actions = "a",
+    },
+    lsp_blacklist = {},
+    symbol_blacklist = {},
+    symbols = {
+        File = {icon = "", hl = "TSURI"},
+        Module = {icon = "", hl = "TSNamespace"},
+        Namespace = {icon = "", hl = "TSNamespace"},
+        Package = {icon = "", hl = "TSNamespace"},
+        Class = {icon = "𝓒", hl = "TSType"},
+        Method = {icon = "ƒ", hl = "TSMethod"},
+        Property = {icon = "", hl = "TSMethod"},
+        Field = {icon = "", hl = "TSField"},
+        Constructor = {icon = "", hl = "TSConstructor"},
+        Enum = {icon = "ℰ", hl = "TSType"},
+        Interface = {icon = "ﰮ", hl = "TSType"},
+        Function = {icon = "", hl = "TSFunction"},
+        Variable = {icon = "", hl = "TSConstant"},
+        Constant = {icon = "", hl = "TSConstant"},
+        String = {icon = "𝓐", hl = "TSString"},
+        Number = {icon = "#", hl = "TSNumber"},
+        Boolean = {icon = "⊨", hl = "TSBoolean"},
+        Array = {icon = "", hl = "TSConstant"},
+        Object = {icon = "⦿", hl = "TSType"},
+        Key = {icon = "🔐", hl = "TSType"},
+        Null = {icon = "NULL", hl = "TSType"},
+        EnumMember = {icon = "", hl = "TSField"},
+        Struct = {icon = "𝓢", hl = "TSType"},
+        Event = {icon = "🗲", hl = "TSType"},
+        Operator = {icon = "+", hl = "TSOperator"},
+        TypeParameter = {icon = "𝙏", hl = "TSParameter"}
+    }
+}
+EOF
+"""
+[[plugins]]
+repo = "kyazdani42/nvim-tree.lua"
+on_lua = "nvim-tree"
+hook_add ="""
+lua <<EOF
+require'nvim-tree'.setup {
+  view = {
+    side ="right",
+    width = 50
+    },
+  actions = {
+    use_system_clipboard = true,
+    change_dir = {
+      enable = true,
+      global = false,
+      restrict_above_cwd = false,
+    },
+    open_file = {
+      quit_on_open = true,
+      resize_window = false,
+      window_picker = {
+        enable = true,
+        chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+        exclude = {
+          filetype = { "notify", "packer", "qf", "diff", "fugitive", "fugitiveblame" },
+          buftype = { "nofile", "terminal", "help" },
+        },
+      },
+    },
+  },
+}
+EOF
+"""
+[[plugins]]
+repo = "nvim-telescope/telescope.nvim"
+depends = ["kdheepak/lazygit.nvim","plenary.nvim"]
+hook_post_source ="""
+lua <<EOF
+require('telescope').load_extension('lazygit')
+EOF
+"""
+[[plugins]]
+repo = "kdheepak/lazygit.nvim"

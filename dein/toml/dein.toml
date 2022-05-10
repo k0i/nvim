@@ -1,0 +1,71 @@
+[[plugins]]
+repo = 'easymotion/vim-easymotion'
+[[plugins]]
+repo = 'rust-lang/rust.vim'
+on_ft = 'rust'
+[[plugins]]
+repo = 'nvim-lua/completion-nvim'
+[[plugins]]
+repo = 'neovim/nvim-lspconfig'
+[[plugins]]
+repo = 'github/copilot.vim'
+[[plugins]]
+repo = 'airblade/vim-gitgutter'
+[[plugins]]
+repo = 'APZelos/blamer.nvim'
+[[plugins]]
+repo = 'wakatime/vim-wakatime'
+[[plugins]]
+repo = '4513ECHO/vim-colors-hatsunemiku'
+[[plugins]]
+repo = 'sainnhe/edge'
+[[plugins]]
+repo = 'hrsh7th/vim-vsnip'
+[[plugins]]
+ repo = 'hrsh7th/vim-vsnip-integ'
+[[plugins]]
+repo = 'Shougo/denite.nvim'
+[[plugins]]
+repo = 'itchyny/lightline.vim'
+[[plugins]]
+repo = 'josa42/nvim-lightline-lsp'
+hook_add ="""
+let g:lightline = {
+      \ 'colorscheme': 'ayu_light',
+      \ 'active': {
+      \   'left': [ [ 'mode','gitbranch',"helloworld",'lsp_errors','lsp_status'],
+      \             [ 'absolutepath' ,'lsp_info', 'lsp_hints', 'lsp_warnings', 'lsp_ok' ] ]
+      \ },
+      \ 'separator' : { 'left': '', 'right': ''  },
+      \ 'subseparator' : { 'left': '', 'right': ''  },
+      \ 'component': {
+      \   'helloworld': 'Приступим'
+      \ },
+      \ 'component_expand': {
+      \   'lsp_warnings': 'lightline#lsp#warnings',
+      \   'lsp_errors': 'lightline#lsp#errors',
+      \   'lsp_info': 'lightline#lsp#info',
+      \   'lsp_hints': 'lightline#lsp#hints',
+      \   'lsp_ok': 'lightline#lsp#ok',
+      \   'status': 'lightline#lsp#status',
+      \ },
+      \ 'component_function': {
+      \   'gitbranch': 'gitbranch#name',
+      \   'gitgutter': 'MyGitGutter',
+      \   'modified': 'MyModified',
+      \ },
+      \ 'component_type': {
+      \   'lsp_warnings': 'warning',
+      \   'lsp_errors': 'error',
+      \   'lsp_info': 'info',
+      \   'lsp_hints': 'hints',
+      \   'lsp_ok': 'left',
+      \ },
+      \}
+"""
+[[plugins]]
+repo = 'ryanoasis/vim-devicons'
+depends =['lightline.vim','denite.nvim']
+[[plugins]]
+repo = 'tpope/vim-fugitive'
+

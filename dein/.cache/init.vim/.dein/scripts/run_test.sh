@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/neovim/nvim-lspconfig/scripts/run_test.sh

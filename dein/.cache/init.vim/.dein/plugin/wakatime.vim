@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/wakatime/vim-wakatime/plugin/wakatime.vim

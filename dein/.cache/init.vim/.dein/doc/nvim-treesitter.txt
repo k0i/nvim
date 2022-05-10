@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/nvim-treesitter/nvim-treesitter/doc/nvim-treesitter.txt

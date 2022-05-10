@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/rust-lang/rust.vim/autoload/rust/tags.vim

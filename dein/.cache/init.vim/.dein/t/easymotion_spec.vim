@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/easymotion/vim-easymotion/t/easymotion_spec.vim

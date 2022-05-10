@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/soft-aesthetic/soft-era-vim/autoload/airline/themes/softera.vim
