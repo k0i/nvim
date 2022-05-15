@@ -8,16 +8,16 @@ call dein#load_state('/home/koyam/.cache/nvim/dein')
   call dein#add('/home/koyam/.cache/dein/repos/github.com/Shougo/dein.vim')
   call dein#add('nvim-treesitter/nvim-treesitter', { 'merged': 0 })
   call dein#load_toml(s:toml,      {'lazy': 0})
+  call dein#add('kyazdani42/nvim-tree.lua')
   call dein#load_toml(s:lazy_toml, {'lazy': 1})
-  autocmd VimEnter * call dein#call_hook('post_source')
   call dein#end()
 filetype plugin indent on
 syntax enable
 if dein#check_install()
   call dein#install()
 endif
-autocmd VimEnter * call dein#call_hook('post_source')
 
+autocmd VimEnter * call dein#call_hook('post_source')
 " End dein Scripts-----------------------
 " TreeSitter
 lua <<EOF
@@ -28,7 +28,13 @@ require'nvim-treesitter.configs'.setup {
 }
 EOF
 let g:python3_host_prog = '/usr/bin/python3'
-colorscheme hatsunemiku
+"colorscheme hatsunemiku
+colorscheme moonfly 
+let g:moonflyCursorColor = 1
+let g:moonflyUnderlineMatchParen = 1
+let g:moonflyWinSeparator = 2
+set fillchars=horiz:━,horizup:┻,horizdown:┳,vert:┃,vertleft:┨,vertright:┣,verthoriz:╋
+
 hi! Normal ctermbg=NONE ctermfg=NONE guifg=NONE guibg=NONE
 hi! LineNr ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
 set showmatch
@@ -42,26 +48,28 @@ let mapleader=" "
 nnoremap <SPACE> <Nop>
 set noshowmode
 autocmd BufWritePost  ~/.config/nvim/init.vim  so ~/.config/nvim/init.vim
-set list
-set listchars=tab:»-,trail:-,eol:↲,extends:»,precedes:«,nbsp:%
 set encoding=utf-8
 scriptencoding utf-8
 noremap <silent> jj <Esc>
 set backspace=indent,eol,start
 nnoremap <C-Left>w <C-Left>wc 
-nnoremap <C-p> :DeniteProjectDir file/rec -start-filter <CR>
-nnoremap <C-g> :DeniteProjectDir grep<CR>
+nnoremap <silent><C-p> <cmd>lua require('telescope.builtin').find_files()<CR>
+nnoremap <C-g> <cmd>lua require('telescope.builtin').live_grep()<CR>
+nnoremap <leader>g <cmd>lua require('telescope.builtin').grep_string()<CR>
 nnoremap <leader>dt :lua require"dapui".toggle()<CR>
 nnoremap <leader>ds :lua require"dapui".eval()<CR>
 nnoremap <leader><leader>e <cmd>TroubleToggle<cr>
+nnoremap <leader><leader>q <cmd>TroubleToggle quickfix<cr>
 nnoremap <Leader>. :lua require("trouble").next({skip_groups = true, jump = true})<CR>
 nnoremap <Leader>, :lua require("trouble").previous({skip_groups = true, jump = true})<CR>
 nnoremap <Leader>[ :bnext<CR>
 nnoremap <Leader>] :bprev<CR>
-nnoremap <Leader><tab> :Denite buffer<CR>
+nnoremap <Leader><tab> <cmd>lua require('telescope.builtin').buffers()<CR>
 nnoremap <Leader>d "_dd
 nnoremap x "_x
 vnoremap x "_x
+nnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
+inoremap <silent><c-t> <Esc><Cmd>exe v:count1 . "ToggleTerm"<CR>
 
 :nmap <c-s> :w<CR>
 inoremap <Esc> <Esc>lh
@@ -87,6 +95,7 @@ imap <s-tab> <Plug>(completion_smart_s_tab)
 nmap s <Plug>(easymotion-overwin-f2)
 map  w <Plug>(easymotion-w)
 map  b <Plug>(easymotion-b)
+map  e <Plug>(easymotion-lineforward)
 let g:EasyMotion_smartcase = 1
 
 "dap
@@ -109,77 +118,38 @@ nnoremap <leader>pc <cmd>lua require('goto-preview').close_all_win()<CR>
 "symbols-outline
 nnoremap <leader>a :SymbolsOutline<CR>
 "nvim-tree
-nnoremap <leader>z :NvimTreeFindFileToggle<CR>
+nnoremap <leader>z :NvimTreeToggle<CR>
 "lazygit
 nnoremap lgt :LazyGit <CR>
+let g:lazygit_floating_window_winblend = 0
+let g:lazygit_floating_window_use_plenary = 0
+"resize
+let g:winresizer_start_key = '<leader>1'
+"nvim-tree
+lua <<EOF
+require'nvim-tree'.setup {
+  view = {
+    side ="right",
+    width = 50
+    },
+    open_file = {
+      quit_on_open = true,
+      resize_window = false,
+      window_picker = {
+        enable = true,
+        chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+        exclude = {
+          filetype = { "notify", "packer", "qf", "diff", "fugitive", "fugitiveblame" },
+          buftype = { "nofile", "terminal", "help" },
+        },
+      },
+    },
+  }
+EOF
 
 
-" Change file/rec command.
-call denite#custom#var('file/rec', 'command',
-  \ ['rg', '--files', '--glob', '!.git', '--color', 'never'])
-call denite#custom#var('grep', {
-		\ 'command': ['rg'],
-		\ 'default_opts': ['-i', '--vimgrep', '--no-heading'],
-		\ 'recursive_opts': [],
-		\ 'pattern_opt': ['--regexp'],
-		\ 'separator': ['--'],
-		\ 'final_opts': [],
-		\ })
 
-" Define mappings
-autocmd FileType denite call s:denite_my_settings()
-function! s:denite_my_settings() abort
-	nnoremap <silent><buffer><expr> <CR>
-	  \ denite#do_map('do_action')
-	nnoremap <silent><buffer><expr> d
-	  \ denite#do_map('do_action', 'delete')
-	nnoremap <silent><buffer><expr> p
-	  \ denite#do_map('do_action', 'preview')
-	nnoremap <silent><buffer><expr> q
-	  \ denite#do_map('quit')
-	nnoremap <silent><buffer><expr> i
-	  \ denite#do_map('open_filter_buffer')
-	nnoremap <silent><buffer><expr> <Space>
-	  \ denite#do_map('toggle_select').'j'
-endfunction
-let s:denite_win_width_percent = 0.75
-let s:denite_win_height_percent = 0.64
-call denite#custom#option('default', 'statusline', v:false)
-call denite#custom#map('insert', '<esc>', '<denite:enter_mode:normal>', 'noremap')
-call denite#custom#map('normal', '<esc>', '<denite:quit>', 'noremap')
-call denite#custom#map('insert', '<C-j>', '<denite:do_action:split>', 'noremap')
-call denite#custom#map('insert', '<C-k>', '<denite:do_action:vsplit>', 'noremap')
-noremap <leader>g :DeniteCursorWord grep<CR>
-if exists('g:loaded_lightline')
-  call denite#custom#option('default', 'statusline', v:false)
-endif
-function! MyMode()
-  if &ft == 'denite'
-    let mode_str = substitute(denite#get_status_mode(), "-\\| ", "", "g")
-    call lightline#link(tolower(mode_str[0]))
-    return mode_str
-  else
-
-    return winwidth('.') > 60 ? lightline#mode() : ''
-  endif
-endfunction
-
-
-" Change denite default options
-call denite#custom#option('default', {
-    \ 'split': 'floating',
-    \ 'winwidth': float2nr(&columns * s:denite_win_width_percent),
-    \ 'wincol': float2nr((&columns - (&columns * s:denite_win_width_percent)) / 2),
-    \ 'winheight': float2nr(&lines * s:denite_win_height_percent),
-    \ 'winrow': float2nr((&lines - (&lines * s:denite_win_height_percent)) / 2),
-    \ 'highlight_matched_char': 'WildMenu',
-    \ 'highlight_matched_range': 'Visual',
-    \ 'highlight_window_background': 'Visual',
-    \ 'highlight_filter_background': 'StatusLine',
-    \ 'highlight_prompt': 'StatusLine',
-    \ })
-
-autocmd VimEnter * call dein#call_hook('post_source')
+lua require('lualine').setup()
 
 augroup highlight_yank
     autocmd!
@@ -226,7 +196,7 @@ autocmd WinLeave * setlocal nocursorline
 let g:gitgutter_sign_added = 'a'
 let g:gitgutter_sign_modified = 'm'
 let g:gitgutter_sign_removed = 'd'
-"highlight CursorLine guibg=#144e52 ctermbg=22
+highlight CursorLine guibg=#144e52 ctermbg=22
 set mouse+=a
-let g:webdevicons_enable_denite = 1
+lua require("telescope").setup{}
 

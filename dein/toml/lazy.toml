@@ -60,8 +60,6 @@ end
 EOF
 '''
 [[plugins]]
-repo = 'nvim-lua/plenary.nvim'
-[[plugins]]
 repo = 'leoluz/nvim-dap-go'
 depends = ['plenary.nvim','nvim-dap']
 on_lua = 'dap-go'
@@ -285,7 +283,7 @@ cmp.setup.cmdline(':', {
 })
 local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 local lspconfig = require('lspconfig')
-local servers = { 'tsserver', 'gopls','rust_analyzer' }
+local servers = {  'gopls','rust_analyzer','hls' }
 local on_attach = function(client, bufnr)
    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
    local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
@@ -326,7 +324,10 @@ end
 EOF
 """
 [[plugins]]
-repo = 'kyazdani42/nvim-web-devicons'
+repo = "kyazdani42/nvim-web-devicons"
+[[plugins]]
+repo = "yamatsum/nvim-nonicons"
+depends = ["nvim-web-devicons"]
 [[plugins]]
 repo ='folke/trouble.nvim'
 on_lua ='trouble'
@@ -489,8 +490,8 @@ require('specs').setup{
     min_jump = 10,
     popup = {
         delay_ms = 0,
-        inc_ms = 10,
-        blend = 50,
+        inc_ms = 20,
+        blend = 10,
         width = 50,
         winhl = "PMenu",
         fader = require('specs').pulse_fader,
@@ -522,7 +523,7 @@ vim.g.symbols_outline = {
     auto_preview = true,
     position = 'left',
     relative_width = true,
-    width = 30,
+    width = 50,
     auto_close = false,
     show_numbers = false,
     show_relative_numbers = false,
@@ -554,7 +555,7 @@ vim.g.symbols_outline = {
         Function = {icon = "", hl = "TSFunction"},
         Variable = {icon = "", hl = "TSConstant"},
         Constant = {icon = "", hl = "TSConstant"},
-        String = {icon = "𝓐", hl = "TSString"},
+        String = {icon = "𝓑", hl = "TSString"},
         Number = {icon = "#", hl = "TSNumber"},
         Boolean = {icon = "⊨", hl = "TSBoolean"},
         Array = {icon = "", hl = "TSConstant"},
@@ -571,45 +572,425 @@ vim.g.symbols_outline = {
 EOF
 """
 [[plugins]]
-repo = "kyazdani42/nvim-tree.lua"
-on_lua = "nvim-tree"
+repo = "rcarriga/nvim-notify"
+on_lua = "notify"
 hook_add ="""
 lua <<EOF
-require'nvim-tree'.setup {
-  view = {
-    side ="right",
-    width = 50
-    },
-  actions = {
-    use_system_clipboard = true,
-    change_dir = {
-      enable = true,
-      global = false,
-      restrict_above_cwd = false,
-    },
-    open_file = {
-      quit_on_open = true,
-      resize_window = false,
-      window_picker = {
-        enable = true,
-        chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
-        exclude = {
-          filetype = { "notify", "packer", "qf", "diff", "fugitive", "fugitiveblame" },
-          buftype = { "nofile", "terminal", "help" },
-        },
-      },
-    },
-  },
+require("notify").setup{
+stages = "slide"
+}
+vim.notify = require("notify")
+EOF
+"""
+[[plugins]]
+repo = "kdheepak/lazygit.nvim"
+[[plugins]]
+repo = "karb94/neoscroll.nvim"
+on_lua = "neoscroll"
+hook_add ="""
+lua <<EOF
+require('neoscroll').setup{}
+EOF
+"""
+[[plugins]]
+repo = "lukas-reineke/indent-blankline.nvim"
+on_lua = "indent_blankline"
+hook_add ="""
+lua <<EOF
+vim.opt.list = true
+vim.opt.listchars:append("space:⋅")
+vim.opt.listchars:append("eol:↴")
+
+require("indent_blankline").setup {
+    space_char_blankline = " ",
+    show_current_context = true,
+    show_current_context_start = true,
+}
+EOF
+"""
+[[plugins]]
+repo = "akinsho/toggleterm.nvim"
+on_lua = "toggleterm"
+hook_add ="""
+lua <<EOF
+require('toggleterm').setup{
+size = 30
 }
 EOF
 """
 [[plugins]]
 repo = "nvim-telescope/telescope.nvim"
-depends = ["kdheepak/lazygit.nvim","plenary.nvim"]
-hook_post_source ="""
+on_lua = "telescope"
+on_cmd = "Telescope"
+hook_post_source = "lua require('telescope').setup()"
+[[plugins]]
+repo = "SmiteshP/nvim-gps"
+depends = ["nvim-treesitter"]
+on_lua = "nvim-gps"
+hook_add ="""
 lua <<EOF
-require('telescope').load_extension('lazygit')
+require('nvim-gps').setup{}
 EOF
 """
 [[plugins]]
-repo = "kdheepak/lazygit.nvim"
+repo = "nvim-lualine/lualine.nvim"
+on_lua = "lualine"
+depends = ["nvim-gps"]
+hook_post_source ="""
+lua <<EOF
+local gps = require("nvim-gps")
+local colors = {
+  red = '#ca1243',
+  blue = '#0088dc',
+  purple = '#ecb0f5',
+  grey = '#a0a1a7',
+  black = '#383a42',
+  white = '#f3f3f3',
+  green = '#BEF6CC',
+  orange = '#fe8019',
+  green = '#8ec07c',
+}
+
+local theme = {
+  normal = {
+    a = { fg = colors.black, bg = colors.grey },
+    b = { fg = colors.black, bg = colors.white },
+    c = { fg = colors.white, bg = colors.blue },
+    x = { fg = colors.white, bg = colors.red },
+    y = { fg = colors.white, bg = colors.red },
+    z = { fg = colors.white, bg = colors.red },
+  },
+  insert = { a = { fg = colors.black, bg = colors.green } },
+  visual = { a = { fg = colors.black, bg = colors.orange } },
+  replace = { a = { fg = colors.black, bg = colors.green } },
+}
+local empty = require('lualine.component'):extend()
+function empty:draw(default_highlight)
+  self.status = ''
+  self.applied_separator = ''
+  self:apply_highlights(default_highlight)
+  self:apply_section_separators()
+  return self.status
+end
+
+-- Put proper separators and gaps between components in sections
+local function process_sections(sections)
+  for name, section in pairs(sections) do
+    local left = name:sub(9, 10) < 'x'
+    for pos = 1, name ~= 'lualine_z' and #section or #section - 1 do
+      table.insert(section, pos * 2, { empty, color = { fg = colors.white, bg = colors.white } })
+    end
+    for id, comp in ipairs(section) do
+      if type(comp) ~= 'table' then
+        comp = { comp }
+        section[id] = comp
+      end
+      comp.separator = left and { right = '' } or { left = '' }
+    end
+  end
+  return sections
+end
+
+local function search_result()
+  if vim.v.hlsearch == 0 then
+    return ''
+  end
+  local last_search = vim.fn.getreg('/')
+  if not last_search or last_search == '' then
+    return ''
+  end
+  local searchcount = vim.fn.searchcount { maxcount = 9999 }
+  return last_search .. '(' .. searchcount.current .. '/' .. searchcount.total .. ')'
+end
+
+local function modified()
+  if vim.bo.modified then
+    return '+'
+  elseif vim.bo.modifiable == false or vim.bo.readonly == true then
+    return '-'
+  end
+  return ''
+end
+
+require('lualine').setup {
+  options = {
+    theme = theme,
+    component_separators = '',
+    section_separators = { left = '', right = '' },
+  },
+  sections = process_sections {
+    lualine_a = { 'mode' },
+    lualine_b = {
+      'branch',
+      'diff',
+      {
+        'diagnostics',
+        source = { 'nvim' },
+        sections = { 'error' },
+        diagnostics_color = { error = { bg = colors.red, fg = colors.white } },
+      },
+      {
+        'diagnostics',
+        source = { 'nvim' },
+        sections = { 'warn' },
+        diagnostics_color = { warn = { bg = colors.orange, fg = colors.white } },
+      },
+      { 'filename', file_status = false, path = 1 },
+      { modified, color = { bg = colors.red } },
+      {
+        '%w',
+        cond = function()
+          return vim.wo.previewwindow
+        end,
+      },
+      {
+        '%r',
+        cond = function()
+          return vim.bo.readonly
+        end,
+      },
+      {
+        '%q',
+        cond = function()
+          return vim.bo.buftype == 'quickfix'
+        end,
+      },
+    },
+    lualine_c = {{ gps.get_location, cond = gps.is_available },},
+    lualine_x = { 'filetype' },
+    lualine_y = { search_result },
+    lualine_z = { '%l:%c' },
+  },
+  inactive_sections = {
+    lualine_c = { '%f %y %m' },
+    lualine_x = {},
+  },
+}
+EOF
+"""
+[[plugins]]
+repo = "akinsho/flutter-tools.nvim"
+on_ft = "dart"
+depends = ["plenary.nvim","nvim-cmp"]
+on_lua = "flutter-tools"
+hook_add ="""
+lua <<EOF
+local cmp = require'cmp'
+  local lspkind = require('lspkind')
+  cmp.setup({
+    snippet = {
+      expand = function(args)
+        vim.fn["vsnip#anonymous"](args.body)
+      end,
+    },
+  formatting = {
+    format = lspkind.cmp_format({
+      mode = 'symbol', 
+      maxwidth = 100,
+      before = function (entry, vim_item)
+        return vim_item
+      end
+      })
+  },
+  mapping = cmp.mapping.preset.insert({
+    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-e>'] = cmp.mapping.abort(),
+    ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+  }),
+  sources = cmp.config.sources({
+      { name = 'nvim_lsp' },
+      { name = 'vsnip' },
+      {
+        { name = 'buffer' }
+      }
+      }),
+  })
+  cmp.setup.cmdline('/', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = {
+      { name = 'buffer' }
+    }
+  })
+  cmp.setup.cmdline(':', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = cmp.config.sources({
+      { name = 'path' }
+    }, {
+      { name = 'cmdline' }
+    })
+  })
+  local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+  local lspconfig = require('lspconfig')
+  local on_attach = function(client, bufnr)
+   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+   local opts = { noremap = true, silent = true }
+   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+   buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+   buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+   buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+   buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+   buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+   buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+   buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+   buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+   buf_set_keymap("n", "<F5>", "<cmd>lua require'dap'.continue()<CR>", opts)
+   buf_set_keymap('n', '<Leader>p', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
+   buf_set_keymap('n', '<Leader>n', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+   buf_set_keymap("n", "<Leader>s", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
+   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+
+   buf_set_keymap("n", "<leader>frd", "<cmd>FlutterRun --dart-define=APP_NAME=kikaiApp --dart-define=APP_SUFFIX=dev --dart-define=APP_ENV=dev --dart-define=APP_ASSOCIATED_DOMAIN=applinks:com.vitalize<CR>", opts)
+   buf_set_keymap("n", "<leader>fr", "<cmd>FlutterReload<CR>", opts)
+   buf_set_keymap("n", "<space>fq", "<cmd>FlutterQuit<CR>", opts)
+
+   cfg ={
+     hint_prefix = "ПФ 🤔 : ", 
+     transparency = 30,
+   }
+   require "lsp_signature".on_attach(cfg,bufnr)
+  end
+require('flutter-tools').setup{
+  lsp = {
+    on_attach = on_attach,
+    capabilities = capabilities
+  },
+  
+}
+EOF
+"""
+[[plugins]]
+repo = "jose-elias-alvarez/null-ls.nvim"
+on_lua = "null-ls"
+[[plugins]]
+repo = "jose-elias-alvarez/nvim-lsp-ts-utils"
+depends = ["plenary.nvim","nvim-cmp","null-ls.nvim"]
+on_lua = "nvim-lsp-ts-utils"
+hook_add = """
+lua << EOF
+local cmp = require'cmp'
+local lspkind = require('lspkind')
+  cmp.setup({
+    snippet = {
+      expand = function(args)
+        vim.fn["vsnip#anonymous"](args.body)
+      end,
+    },
+  formatting = {
+    format = lspkind.cmp_format({
+      mode = 'symbol', 
+      maxwidth = 100,
+      before = function (entry, vim_item)
+        return vim_item
+      end
+      })
+  },
+  mapping = cmp.mapping.preset.insert({
+    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-e>'] = cmp.mapping.abort(),
+    ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+  }),
+  sources = cmp.config.sources({
+      { name = 'nvim_lsp' },
+      { name = 'vsnip' },
+      {
+        { name = 'buffer' }
+      }
+      }),
+  })
+  cmp.setup.cmdline('/', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = {
+      { name = 'buffer' }
+    }
+  })
+  cmp.setup.cmdline(':', {
+    mapping = cmp.mapping.preset.cmdline(),
+    sources = cmp.config.sources({
+      { name = 'path' }
+    }, {
+      { name = 'cmdline' }
+    })
+  })
+  local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+  local lspconfig = require('lspconfig')
+  local null_ls = require("null-ls")
+  lspconfig.tsserver.setup({
+    on_attach = function(client, bufnr)
+        client.resolved_capabilities.document_formatting = false
+        client.resolved_capabilities.document_range_formatting = false
+        local ts_utils = require("nvim-lsp-ts-utils")
+        ts_utils.setup({})
+        ts_utils.setup_client(client)
+        buf_map(bufnr, "n", "gs", ":TSLspOrganize<CR>")
+        buf_map(bufnr, "n", "gi", ":TSLspRenameFile<CR>")
+        buf_map(bufnr, "n", "go", ":TSLspImportAll<CR>")
+        on_attach(client, bufnr)
+    end,
+  })
+   local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+  local on_attach = function(client, bufnr)
+   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+   local opts = { noremap = true, silent = true }
+   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+   buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+   buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+   buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+   buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+   buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+   buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+   buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+   buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+   buf_set_keymap("n", "<F5>", "<cmd>lua require'dap'.continue()<CR>", opts)
+   buf_set_keymap('n', '<Leader>p', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
+   buf_set_keymap('n', '<Leader>n', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+   buf_set_keymap("n", "<Leader>s", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
+   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+
+   buf_set_keymap("n", "<leader>frd", "<cmd>FlutterRun --dart-define=APP_NAME=kikaiApp --dart-define=APP_SUFFIX=dev --dart-define=APP_ENV=dev --dart-define=APP_ASSOCIATED_DOMAIN=applinks:com.vitalize<CR>", opts)
+   buf_set_keymap("n", "<leader>fr", "<cmd>FlutterReload<CR>", opts)
+   buf_set_keymap("n", "<space>fq", "<cmd>FlutterQuit<CR>", opts)
+
+   cfg ={
+     hint_prefix = "ПФ 🤔 : ", 
+     transparency = 30,
+   }
+   require "lsp_signature".on_attach(cfg,bufnr)
+  end
+  null_ls.setup({
+    sources = {
+        null_ls.builtins.diagnostics.eslint,
+        null_ls.builtins.code_actions.eslint,
+        null_ls.builtins.formatting.prettier,
+    },
+    on_attach = on_attach,
+    capabilities = capabilities
+})
+EOF
+"""
+[[plugins]]
+repo = "AckslD/nvim-neoclip.lua"
+depends = ["telescope.nvim"]
+on_lua = "neoclip"
+hook_add = """
+lua << EOF
+require('neoclip').setup()
+EOF
+"""
