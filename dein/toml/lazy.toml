@@ -24,7 +24,6 @@ require("dapui").setup({
       {
         id = "scopes",
         size = 0.8, 
-
       },
       { id = "stacks", size = 0.0},
     },
@@ -182,16 +181,15 @@ local codelldb_path = extension_path .. 'adapter/codelldb'
 local liblldb_path = extension_path .. 'lldb/lib/liblldb.so'
 local opts = {
    tools = {
-      autoSetHints = false,
+      autoSetHints = true,
       hover_with_actions = true,
       executor = require("rust-tools/executors").termopen,
       inlay_hints = {
          only_current_line = false,
-	 show_variable_name = true,
-	 right_align= true,
-	 right_align_padding = 7,
+         show_parameter_hints = true,
          other_hints_prefix = "::",
          parameter_hints_prefix = "<=",
+         highlight = "Comment",
       },
       hover_actions ={
         auto_focus  = true,
@@ -204,6 +202,7 @@ local opts = {
    server = {
       on_attach = on_attach,
       capabilities = capabilities,
+      standalone = false,
       settings = {
          ["rust-analyzer"] = {
             checkOnSave = {
@@ -232,17 +231,23 @@ repo = 'ray-x/lsp_signature.nvim'
 repo = 'hrsh7th/nvim-cmp'
 depends = ['nvim-lspconfig', 'cmp-nvim-lsp', 'cmp-buffer','cmp-path','cmp-cmdline','lspkind.nvim','lsp_signature.nvim']
 on_lua = "cmp"
-rev = "bba6fb67fdafc0af7c5454058dfbabc2182741f4"
 hook_add = """
 lua <<EOF
 local cmp = require'cmp'
 local lspkind = require('lspkind')
+local winhighlight = {
+  winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:PmenuSel",
+}
 cmp.setup({
    snippet = {
       expand = function(args)
          vim.fn["vsnip#anonymous"](args.body)
       end,
    },
+    window = {
+    completion = cmp.config.window.bordered(winhighlight),
+    documentation = cmp.config.window.bordered(winhighlight),
+  },
   formatting = {
     format = lspkind.cmp_format({
       mode = 'symbol', 
@@ -283,7 +288,7 @@ cmp.setup.cmdline(':', {
 })
 local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 local lspconfig = require('lspconfig')
-local servers = {  'gopls','rust_analyzer','hls' }
+local servers = {  'gopls','hls', 'vuels','clangd' }
 local on_attach = function(client, bufnr)
    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
    local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
@@ -313,7 +318,6 @@ local on_attach = function(client, bufnr)
      transparency = 30,
    }
    require "lsp_signature".on_attach(cfg,bufnr)
-
 end
 for _, lsp in ipairs(servers) do
    lspconfig[lsp].setup {
@@ -452,7 +456,6 @@ vim.api.nvim_set_keymap(
         silent = true
     }
 )
-
 vim.api.nvim_set_keymap(
     "v",
     "<F4>",
@@ -600,7 +603,6 @@ lua <<EOF
 vim.opt.list = true
 vim.opt.listchars:append("space:⋅")
 vim.opt.listchars:append("eol:↴")
-
 require("indent_blankline").setup {
     space_char_blankline = " ",
     show_current_context = true,
@@ -619,12 +621,20 @@ size = 30
 EOF
 """
 [[plugins]]
+repo = "nvim-telescope/telescope-project.nvim"
+[[plugins]]
 repo = "nvim-telescope/telescope.nvim"
 on_lua = "telescope"
 on_cmd = "Telescope"
-hook_post_source = "lua require('telescope').setup()"
+depends = ["nvim-neoclip.lua","telescope-project.nvim"]
+hook_add = """
+lua << EOF
+require('telescope').setup()
+EOF
+"""
 [[plugins]]
 repo = "SmiteshP/nvim-gps"
+
 depends = ["nvim-treesitter"]
 on_lua = "nvim-gps"
 hook_add ="""
@@ -650,7 +660,6 @@ local colors = {
   orange = '#fe8019',
   green = '#8ec07c',
 }
-
 local theme = {
   normal = {
     a = { fg = colors.black, bg = colors.grey },
@@ -672,7 +681,6 @@ function empty:draw(default_highlight)
   self:apply_section_separators()
   return self.status
 end
-
 -- Put proper separators and gaps between components in sections
 local function process_sections(sections)
   for name, section in pairs(sections) do
@@ -690,7 +698,6 @@ local function process_sections(sections)
   end
   return sections
 end
-
 local function search_result()
   if vim.v.hlsearch == 0 then
     return ''
@@ -702,7 +709,6 @@ local function search_result()
   local searchcount = vim.fn.searchcount { maxcount = 9999 }
   return last_search .. '(' .. searchcount.current .. '/' .. searchcount.total .. ')'
 end
-
 local function modified()
   if vim.bo.modified then
     return '+'
@@ -711,7 +717,6 @@ local function modified()
   end
   return ''
 end
-
 require('lualine').setup {
   options = {
     theme = theme,
@@ -847,11 +852,9 @@ local cmp = require'cmp'
    buf_set_keymap('n', '<Leader>n', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
    buf_set_keymap("n", "<Leader>s", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
    buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-
    buf_set_keymap("n", "<leader>frd", "<cmd>FlutterRun --dart-define=APP_NAME=kikaiApp --dart-define=APP_SUFFIX=dev --dart-define=APP_ENV=dev --dart-define=APP_ASSOCIATED_DOMAIN=applinks:com.vitalize<CR>", opts)
    buf_set_keymap("n", "<leader>fr", "<cmd>FlutterReload<CR>", opts)
    buf_set_keymap("n", "<space>fq", "<cmd>FlutterQuit<CR>", opts)
-
    cfg ={
      hint_prefix = "ПФ 🤔 : ", 
      transparency = 30,
@@ -876,72 +879,67 @@ depends = ["plenary.nvim","nvim-cmp","null-ls.nvim"]
 on_lua = "nvim-lsp-ts-utils"
 hook_add = """
 lua << EOF
-local cmp = require'cmp'
+local cmp = require 'cmp'
 local lspkind = require('lspkind')
-  cmp.setup({
-    snippet = {
+local winhighlight = {
+   winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:PmenuSel",
+}
+cmp.setup({
+   snippet = {
       expand = function(args)
-        vim.fn["vsnip#anonymous"](args.body)
+         vim.fn["vsnip#anonymous"](args.body)
       end,
-    },
-  formatting = {
-    format = lspkind.cmp_format({
-      mode = 'symbol', 
-      maxwidth = 100,
-      before = function (entry, vim_item)
-        return vim_item
-      end
+   },
+   window = {
+      completion = cmp.config.window.bordered(winhighlight),
+      documentation = cmp.config.window.bordered(winhighlight),
+   },
+   formatting = {
+      format = lspkind.cmp_format({
+         mode = 'symbol',
+         maxwidth = 100,
+         before = function(entry, vim_item)
+            return vim_item
+         end
       })
-  },
-  mapping = cmp.mapping.preset.insert({
-    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.abort(),
-    ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-  }),
-  sources = cmp.config.sources({
+   },
+   mapping = cmp.mapping.preset.insert({
+      ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      ['<C-Space>'] = cmp.mapping.complete(),
+      ['<C-e>'] = cmp.mapping.abort(),
+      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+   }),
+   sources = cmp.config.sources({
       { name = 'nvim_lsp' },
       { name = 'vsnip' },
       {
-        { name = 'buffer' }
+         { name = 'buffer' }
       }
-      }),
-  })
-  cmp.setup.cmdline('/', {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = {
+   }),
+})
+cmp.setup.cmdline('/', {
+   mapping = cmp.mapping.preset.cmdline(),
+   sources = {
       { name = 'buffer' }
-    }
-  })
-  cmp.setup.cmdline(':', {
-    mapping = cmp.mapping.preset.cmdline(),
-    sources = cmp.config.sources({
+   }
+})
+cmp.setup.cmdline(':', {
+   mapping = cmp.mapping.preset.cmdline(),
+   sources = cmp.config.sources({
       { name = 'path' }
-    }, {
+   }, {
       { name = 'cmdline' }
-    })
-  })
-  local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
-  local lspconfig = require('lspconfig')
-  local null_ls = require("null-ls")
-  lspconfig.tsserver.setup({
-    on_attach = function(client, bufnr)
-        client.resolved_capabilities.document_formatting = false
-        client.resolved_capabilities.document_range_formatting = false
-        local ts_utils = require("nvim-lsp-ts-utils")
-        ts_utils.setup({})
-        ts_utils.setup_client(client)
-        buf_map(bufnr, "n", "gs", ":TSLspOrganize<CR>")
-        buf_map(bufnr, "n", "gi", ":TSLspRenameFile<CR>")
-        buf_map(bufnr, "n", "go", ":TSLspImportAll<CR>")
-        on_attach(client, bufnr)
-    end,
-  })
-   local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
-  local on_attach = function(client, bufnr)
+   })
+})
+local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+local lspconfig = require('lspconfig')
+local servers = { 'gopls', 'rust_analyzer', 'hls' }
+local on_attach = function(client, bufnr)
    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+
    local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+
    local opts = { noremap = true, silent = true }
    buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
    buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
@@ -963,25 +961,138 @@ local lspkind = require('lspkind')
    buf_set_keymap('n', '<Leader>n', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
    buf_set_keymap("n", "<Leader>s", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
    buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-
-   buf_set_keymap("n", "<leader>frd", "<cmd>FlutterRun --dart-define=APP_NAME=kikaiApp --dart-define=APP_SUFFIX=dev --dart-define=APP_ENV=dev --dart-define=APP_ASSOCIATED_DOMAIN=applinks:com.vitalize<CR>", opts)
-   buf_set_keymap("n", "<leader>fr", "<cmd>FlutterReload<CR>", opts)
-   buf_set_keymap("n", "<space>fq", "<cmd>FlutterQuit<CR>", opts)
-
-   cfg ={
-     hint_prefix = "ПФ 🤔 : ", 
-     transparency = 30,
+   cfg = {
+      hint_prefix = "ПФ 🤔 : ",
+      transparency = 30,
    }
-   require "lsp_signature".on_attach(cfg,bufnr)
-  end
-  null_ls.setup({
-    sources = {
-        null_ls.builtins.diagnostics.eslint,
-        null_ls.builtins.code_actions.eslint,
-        null_ls.builtins.formatting.prettier,
-    },
-    on_attach = on_attach,
-    capabilities = capabilities
+   require "lsp_signature".on_attach(cfg, bufnr)
+end
+for _, lsp in ipairs(servers) do
+   lspconfig[lsp].setup {
+      on_attach = on_attach,
+      capabilities = capabilities,
+   }
+end
+
+
+local cmp = require 'cmp'
+local lspkind = require('lspkind')
+local winhighlight = {
+   winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:PmenuSel",
+}
+cmp.setup({
+   snippet = {
+      expand = function(args)
+         vim.fn["vsnip#anonymous"](args.body)
+      end,
+   },
+   window = {
+      completion = cmp.config.window.bordered(winhighlight),
+      documentation = cmp.config.window.bordered(winhighlight),
+   },
+   formatting = {
+      format = lspkind.cmp_format({
+         mode = 'symbol',
+         maxwidth = 100,
+         before = function(entry, vim_item)
+            return vim_item
+         end
+      })
+   },
+   mapping = cmp.mapping.preset.insert({
+      ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+      ['<C-f>'] = cmp.mapping.scroll_docs(4),
+      ['<C-Space>'] = cmp.mapping.complete(),
+      ['<C-e>'] = cmp.mapping.abort(),
+      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+   }),
+   sources = cmp.config.sources({
+      { name = 'nvim_lsp' },
+      { name = 'vsnip' },
+      {
+         { name = 'buffer' }
+      }
+   }),
+})
+cmp.setup.cmdline('/', {
+   mapping = cmp.mapping.preset.cmdline(),
+   sources = {
+      { name = 'buffer' }
+   }
+})
+cmp.setup.cmdline(':', {
+   mapping = cmp.mapping.preset.cmdline(),
+   sources = cmp.config.sources({
+      { name = 'path' }
+   }, {
+      { name = 'cmdline' }
+   })
+})
+local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+local lspconfig = require("lspconfig")
+local null_ls = require("null-ls")
+local buf_map = function(bufnr, mode, lhs, rhs, opts)
+   vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, opts or {
+      silent = true,
+   })
+end
+local on_attach = function(client, bufnr)
+   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
+
+   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
+
+   local opts = { noremap = true, silent = true }
+   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
+   buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
+   buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+   buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
+   buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
+   buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
+   buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
+   buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
+   buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
+   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
+   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
+   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
+   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
+   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+   buf_set_keymap("n", "<F5>", "<cmd>lua require'dap'.continue()<CR>", opts)
+   buf_set_keymap('n', '<Leader>p', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
+   buf_set_keymap('n', '<Leader>n', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
+   buf_set_keymap("n", "<Leader>s", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
+   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
+   cfg = {
+      hint_prefix = "ПФ 🤔 : ",
+      transparency = 30,
+   }
+   require "lsp_signature".on_attach(cfg, bufnr)
+   if client.resolved_capabilities.document_formatting then
+      vim.cmd("autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_sync()")
+   end
+end
+lspconfig.tsserver.setup({
+   on_attach = function(client, bufnr)
+      client.resolved_capabilities.document_formatting = false
+      client.resolved_capabilities.document_range_formatting = false
+      local ts_utils = require("nvim-lsp-ts-utils")
+      ts_utils.setup({})
+      ts_utils.setup_client(client)
+      buf_map(bufnr, "n", "gs", ":TSLspOrganize<CR>")
+      buf_map(bufnr, "n", "gi", ":TSLspRenameFile<CR>")
+      buf_map(bufnr, "n", "go", ":TSLspImportAll<CR>")
+      on_attach(client, bufnr)
+   end,
+   capabilities = capabilities,
+})
+null_ls.setup({
+   sources = {
+      null_ls.builtins.diagnostics.eslint,
+      null_ls.builtins.code_actions.eslint,
+      null_ls.builtins.formatting.prettier,
+   },
+   on_attach = on_attach,
+   capabilities = capabilities,
 })
 EOF
 """
@@ -991,6 +1102,89 @@ depends = ["telescope.nvim"]
 on_lua = "neoclip"
 hook_add = """
 lua << EOF
-require('neoclip').setup()
+require('neoclip').setup({
+  keys = {
+        telescope = {
+          i = {
+            paste = '<cr>',
+            paste_behind = '<c-k>',
+            replay = '<c-q>',  -- replay a macro
+            delete = '<c-d>',  -- delete an entry
+            custom = {},
+          },
+          n = {
+            paste = 'cr',
+            paste_behind = 'P',
+            replay = 'q',
+            delete = 'd',
+            custom = {},
+          },
+        },
+  }
+})
+EOF
+"""
+[[plugins]]
+repo = 'kyazdani42/nvim-tree.lua'
+on_lua = "nvim-tree"
+hook_add = """
+lua <<EOF
+require'nvim-tree'.setup {
+  view = {
+    side ="right",
+    width = 50
+    },
+    actions ={
+    open_file = {
+      quit_on_open = true,
+      resize_window = false,
+      window_picker = {
+        enable = true,
+        chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+        exclude = {
+          filetype = { "notify", "packer", "qf", "diff", "fugitive", "fugitiveblame" },
+          buftype = { "nofile", "terminal", "help" },
+        },
+      },
+    }
+  },
+  }
+EOF
+"""
+[[plugins]]
+repo = "lewis6991/gitsigns.nvim"
+on_lua = "gitsigns"
+hook_add = """
+lua << EOF
+require('gitsigns').setup{
+ signs = {
+    add          = {hl = 'GitSignsAdd'   , text = 'a', numhl='GitSignsAddNr'   , linehl='GitSignsAddLn'},
+    change       = {hl = 'GitSignsChange', text = 'c', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn'},
+    delete       = {hl = 'GitSignsDelete', text = 'd', numhl='GitSignsDeleteNr', linehl='GitSignsDeleteLn'},
+    topdelete    = {hl = 'GitSignsDelete', text = 't', numhl='GitSignsDeleteNr', linehl='GitSignsDeleteLn'},
+    changedelete = {hl = 'GitSignsChange', text = 'e', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn'},
+  },
+}
+EOF
+"""
+[[plugin]]
+repo = "tamton-aquib/zone.nvim"
+on_lua = "zone"
+hook_add ="""
+lua << EOF
+require('zone').setup {
+    style = "treadmill",
+    after = 3,          -- Idle timeout
+    -- More options to come later
+
+    treadmill = {
+        direction = "left",
+        -- Opts for Treadmill style
+    },
+    dvd = {
+        -- Opts for Dvd style
+    },
+    -- etc
+}
 EOF
 """

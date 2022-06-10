@@ -1,24 +1,21 @@
-set nocompatible
-set runtimepath+=/home/koyam/.cache/dein/repos/github.com/Shougo/dein.vim
+set nocompatible 
+set runtimepath +=/home/koyam/.cache/dein/repos/github.com/Shougo/dein.vim
 call dein#load_state('/home/koyam/.cache/nvim/dein')
-  call dein#begin('/home/koyam/.cache/nvim/dein')
-   let s:toml_dir  = $HOME . '/.config/nvim/dein/toml' 
-   let s:toml      = s:toml_dir . '/dein.toml'
-   let s:lazy_toml = s:toml_dir . '/lazy.toml'
-  call dein#add('/home/koyam/.cache/dein/repos/github.com/Shougo/dein.vim')
-  call dein#add('nvim-treesitter/nvim-treesitter', { 'merged': 0 })
-  call dein#load_toml(s:toml,      {'lazy': 0})
-  call dein#add('kyazdani42/nvim-tree.lua')
-  call dein#load_toml(s:lazy_toml, {'lazy': 1})
-  call dein#end()
-filetype plugin indent on
+call dein#begin('/home/koyam/.cache/nvim/dein') 
+let s:toml_dir  = $HOME . '/.config/nvim/dein/toml' 
+let s:toml      = s:toml_dir . '/dein.toml'
+let s:lazy_toml = s:toml_dir . '/lazy.toml'
+call dein#add('/home/koyam/.cache/dein/repos/github.com/Shougo/dein.vim')
+call dein#add('nvim-treesitter/nvim-treesitter',{'merged' : 0})
+call dein#load_toml(s:toml, {'lazy' : 0})
+call dein#load_toml(s:lazy_toml, {'lazy' : 1})
+call dein#end() 
+filetype plugin indent on 
 syntax enable
 if dein#check_install()
-  call dein#install()
+   call dein#install()
 endif
-
-autocmd VimEnter * call dein#call_hook('post_source')
-" End dein Scripts-----------------------
+autocmd VimEnter * call dein#call_hook('post_source') " End dein Scripts-----------------------
 " TreeSitter
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
@@ -29,12 +26,14 @@ require'nvim-treesitter.configs'.setup {
 EOF
 let g:python3_host_prog = '/usr/bin/python3'
 "colorscheme hatsunemiku
-colorscheme moonfly 
-let g:moonflyCursorColor = 1
-let g:moonflyUnderlineMatchParen = 1
-let g:moonflyWinSeparator = 2
-set fillchars=horiz:━,horizup:┻,horizdown:┳,vert:┃,vertleft:┨,vertright:┣,verthoriz:╋
-
+let g:moonlight_italic_comments = 1
+let g:moonlight_italic_keywords = 1
+let g:moonlight_italic_functions = 1
+let g:moonlight_italic_variables = 1
+let g:moonlight_contrast = 1
+let g:moonlight_borders = 1
+let g:moonlight_disable_background = 1
+colorscheme moonlight
 hi! Normal ctermbg=NONE ctermfg=NONE guifg=NONE guibg=NONE
 hi! LineNr ctermfg=NONE ctermbg=NONE guifg=NONE guibg=NONE
 set showmatch
@@ -56,20 +55,24 @@ nnoremap <C-Left>w <C-Left>wc
 nnoremap <silent><C-p> <cmd>lua require('telescope.builtin').find_files()<CR>
 nnoremap <C-g> <cmd>lua require('telescope.builtin').live_grep()<CR>
 nnoremap <leader>g <cmd>lua require('telescope.builtin').grep_string()<CR>
-nnoremap <leader>dt :lua require"dapui".toggle()<CR>
-nnoremap <leader>ds :lua require"dapui".eval()<CR>
+nnoremap <leader>dt <cmd>lua require"dapui".toggle()<CR>
+nnoremap <leader>ds <cmd>lua require"dapui".eval()<CR>
 nnoremap <leader><leader>e <cmd>TroubleToggle<cr>
 nnoremap <leader><leader>q <cmd>TroubleToggle quickfix<cr>
-nnoremap <Leader>. :lua require("trouble").next({skip_groups = true, jump = true})<CR>
-nnoremap <Leader>, :lua require("trouble").previous({skip_groups = true, jump = true})<CR>
-nnoremap <Leader>[ :bnext<CR>
-nnoremap <Leader>] :bprev<CR>
+nnoremap <Leader>. <cmd>lua require("trouble").next({skip_groups = true, jump = true})<CR>
+nnoremap <Leader>, <cmd>lua require("trouble").previous({skip_groups = true, jump = true})<CR>
+nnoremap <Leader>v <cmd>Telescope neoclip a<CR>
+nnoremap <Leader>[ <cmd>bnext<CR>
+nnoremap <Leader>] <cmd>bprev<CR>
 nnoremap <Leader><tab> <cmd>lua require('telescope.builtin').buffers()<CR>
-nnoremap <Leader>d "_dd
+nnoremap <Leader>d "_d
 nnoremap x "_x
 vnoremap x "_x
 nnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
 inoremap <silent><c-t> <Esc><Cmd>exe v:count1 . "ToggleTerm"<CR>
+nnoremap <Leader><leader>p <cmd>lua require'telescope'.extensions.project.project{}<CR>
+nnoremap gg gg0
+nnoremap G G$
 
 :nmap <c-s> :w<CR>
 inoremap <Esc> <Esc>lh
@@ -83,7 +86,7 @@ autocmd TermOpen * startinsert
 set clipboard+=unnamedplus
 let g:rustfmt_autosave = 1
 filetype plugin indent on
-highlight Blamer guifg=lightred guibg=none
+highlight Blamer guifg=#90EE90 guibg=none
 autocmd BufWritePre *.go lua vim.lsp.buf.formatting()
 let g:blamer_enabled = 1
 let g:blamer_delay =400
@@ -118,36 +121,13 @@ nnoremap <leader>pc <cmd>lua require('goto-preview').close_all_win()<CR>
 "symbols-outline
 nnoremap <leader>a :SymbolsOutline<CR>
 "nvim-tree
-nnoremap <leader>z :NvimTreeToggle<CR>
+nnoremap <leader>z :NvimTreeToggle ./<CR>
 "lazygit
 nnoremap lgt :LazyGit <CR>
 let g:lazygit_floating_window_winblend = 0
 let g:lazygit_floating_window_use_plenary = 0
 "resize
 let g:winresizer_start_key = '<leader>1'
-"nvim-tree
-lua <<EOF
-require'nvim-tree'.setup {
-  view = {
-    side ="right",
-    width = 50
-    },
-    open_file = {
-      quit_on_open = true,
-      resize_window = false,
-      window_picker = {
-        enable = true,
-        chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
-        exclude = {
-          filetype = { "notify", "packer", "qf", "diff", "fugitive", "fugitiveblame" },
-          buftype = { "nofile", "terminal", "help" },
-        },
-      },
-    },
-  }
-EOF
-
-
 
 lua require('lualine').setup()
 
@@ -159,7 +139,8 @@ augroup END
 lua <<EOF
   function OrgImports(wait_ms)
     local params = vim.lsp.util.make_range_params()
-    params.context = {only = {"source.organizeImports"}}
+    params.context = {
+  only = { "source.organizeImports" }}
     local result = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, wait_ms)
     for _, res in pairs(result or {}) do
       for _, r in pairs(res.result or {}) do
@@ -172,6 +153,19 @@ lua <<EOF
     end
   end
 EOF
+
+let g:line_number_interval_enable_at_startup = 1
+let g:line_number_interval = 10
+highlight HighlightedLineNr guifg=#00FFFF ctermfg=201
+highlight DimLineNr guifg=#CCCCFF ctermfg=5
+let g:line_number_interval#use_custom = 1
+let g:line_number_interval#custom_interval = [1,2,3,4,5,11,21,31,41,51,61,71]
+highlight HighlightedLineNr1 guifg=#17ffcf ctermfg=15
+highlight HighlightedLineNr2 guifg=#9ACD32 ctermfg=2
+highlight HighlightedLineNr3 guifg=#FF7276 ctermfg=6
+highlight HighlightedLineNr4 guifg=#FFD580 ctermfg=4
+highlight HighlightedLineNr5 guifg=#F50B94 ctermfg=5
+
 " VSnip
 " Expand
 imap <expr> <C-j>   vsnip#expandable()  ? '<Plug>(vsnip-expand)'         : '<C-j>'
@@ -184,7 +178,7 @@ smap <expr> <C-l>   vsnip#available(1)  ? '<Plug>(vsnip-expand-or-jump)' : '<C-l
 " Jump forward or backward
 imap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
 smap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
-imap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
+imap <expr> <S-Tab> vsnip#jumpable(-1)  ?  '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
 smap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
 
 autocmd BufWritePre *.go lua OrgImports(1000)
@@ -192,11 +186,9 @@ set cursorline
 hi cursorline cterm=none term=none
 autocmd WinEnter * setlocal cursorline
 autocmd WinLeave * setlocal nocursorline
-" GitGutter
-let g:gitgutter_sign_added = 'a'
-let g:gitgutter_sign_modified = 'm'
-let g:gitgutter_sign_removed = 'd'
 highlight CursorLine guibg=#144e52 ctermbg=22
 set mouse+=a
-lua require("telescope").setup{}
-
+set number
+set autoindent
+set expandtab
+set hls

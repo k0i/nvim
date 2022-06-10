@@ -10,15 +10,13 @@ repo = 'neovim/nvim-lspconfig'
 [[plugins]]
 repo = 'github/copilot.vim'
 [[plugins]]
-repo = 'airblade/vim-gitgutter'
-[[plugins]]
 repo = 'APZelos/blamer.nvim'
 [[plugins]]
 repo = 'wakatime/vim-wakatime'
 #[[plugins]]
 #repo = '4513ECHO/vim-colors-hatsunemiku'
 [[plugins]]
-repo = 'bluz71/vim-moonfly-colors'
+repo = 'shaunsingh/moonlight.nvim'
 [[plugins]]
 repo = 'sainnhe/edge'
 [[plugins]]
@@ -30,4 +28,6 @@ repo = 'ryanoasis/vim-devicons'
 [[plugins]]
 repo = 'simeji/winresizer'
 [[plugins]]
-repo = "nvim-lua/plenary.nvim"
+repo = 'nvim-lua/plenary.nvim'
+[[plugins]]
+repo = 'IMOKURI/line-number-interval.nvim'
