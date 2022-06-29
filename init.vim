@@ -21,6 +21,7 @@ lua <<EOF
 require'nvim-treesitter.configs'.setup {
   highlight = {
     enable = true,
+    additional_vim_regex_highlighting = false,
   }
 }
 EOF
@@ -49,7 +50,6 @@ set noshowmode
 autocmd BufWritePost  ~/.config/nvim/init.vim  so ~/.config/nvim/init.vim
 set encoding=utf-8
 scriptencoding utf-8
-noremap <silent> jj <Esc>
 set backspace=indent,eol,start
 nnoremap <C-Left>w <C-Left>wc 
 nnoremap <silent><C-p> <cmd>lua require('telescope.builtin').find_files()<CR>
@@ -73,6 +73,7 @@ inoremap <silent><c-t> <Esc><Cmd>exe v:count1 . "ToggleTerm"<CR>
 nnoremap <Leader><leader>p <cmd>lua require'telescope'.extensions.project.project{}<CR>
 nnoremap gg gg0
 nnoremap G G$
+nnoremap t vegyy
 
 :nmap <c-s> :w<CR>
 inoremap <Esc> <Esc>lh
@@ -116,12 +117,13 @@ nnoremap <leader>tn <cmd>UltestNearest <CR>
 nnoremap <leader>tc <cmd>UltestClear <CR>
 
 "goto-preview
-nnoremap <leader>ps <cmd>lua require('goto-preview').goto_preview_definition()<CR>
+nnoremap <leader>ps <cmd>lua require('goto-preview').goto_preview_references()<CR>
 nnoremap <leader>pc <cmd>lua require('goto-preview').close_all_win()<CR>
 "symbols-outline
 nnoremap <leader>a :SymbolsOutline<CR>
 "nvim-tree
-nnoremap <leader>z :NvimTreeToggle ./<CR>
+"nnoremap <leader>z :NvimTreeToggle ./<CR>
+nnoremap <leader>z :NvimTreeFindFileToggle <CR>
 "lazygit
 nnoremap lgt :LazyGit <CR>
 let g:lazygit_floating_window_winblend = 0
@@ -192,3 +194,5 @@ set number
 set autoindent
 set expandtab
 set hls
+
+let g:cursorhold_updatetime = 100

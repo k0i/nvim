@@ -183,7 +183,6 @@ local opts = {
    tools = {
       autoSetHints = true,
       hover_with_actions = true,
-      executor = require("rust-tools/executors").termopen,
       inlay_hints = {
          only_current_line = false,
          show_parameter_hints = true,
@@ -352,14 +351,12 @@ repo = 'vim-test/vim-test'
 hook_add="""
 """
 [[plugins]]
-repo = 'rcarriga/vim-ultest'
-depends = ['vim-test']
-on_lua = 'ultest'
+repo = 'antoinemadec/FixCursorHold.nvim'
+[[plugins]]
+repo = 'nvim-neotest/neotest'
+depends = ['FixCursorHold.nvim','plenary.nvim','nvim-treesitter']
+on_lua = 'neotest'
 hook_add="""
-let g:test#go#runner = 'gotest'
-let test#go#gotest#options = '--color=always'
-let g:ultest_use_pty = 1
-let g:test#strategy = 'neovim'
 """
 [[plugins]]
 repo = 'folke/lsp-colors.nvim'
