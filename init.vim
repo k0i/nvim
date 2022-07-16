@@ -64,6 +64,8 @@ nnoremap <Leader>, <cmd>lua require("trouble").previous({skip_groups = true, jum
 nnoremap <Leader>v <cmd>Telescope neoclip a<CR>
 nnoremap <Leader>[ <cmd>bnext<CR>
 nnoremap <Leader>] <cmd>bprev<CR>
+nnoremap <Leader>tf <cmd>lua require("neotest").run.run(vim.fn.expand("%"))<CR>
+nnoremap <Leader>tn <cmd>lua require("neotest").run.run()<CR>
 nnoremap <Leader><tab> <cmd>lua require('telescope.builtin').buffers()<CR>
 nnoremap <Leader>d "_d
 nnoremap x "_x
@@ -71,9 +73,14 @@ vnoremap x "_x
 nnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
 inoremap <silent><c-t> <Esc><Cmd>exe v:count1 . "ToggleTerm"<CR>
 nnoremap <Leader><leader>p <cmd>lua require'telescope'.extensions.project.project{}<CR>
+nnoremap <Leader><leader>z <cmd>Twilight<CR>
 nnoremap gg gg0
 nnoremap G G$
-nnoremap t vegyy
+nnoremap q vegyy
+nnoremap tn <cmd>$tabnew<CR>
+nnoremap t] <cmd>tabn<CR>
+nnoremap t[ <cmd>tabp<CR>
+nnoremap td <cmd>tabclose<CR>
 
 :nmap <c-s> :w<CR>
 inoremap <Esc> <Esc>lh
@@ -96,12 +103,12 @@ set shortmess+=c
 
 imap <tab> <Plug>(completion_smart_tab)
 imap <s-tab> <Plug>(completion_smart_s_tab)
-nmap s <Plug>(easymotion-overwin-f2)
+nmap s <Plug>(easymotion-s)
 map  w <Plug>(easymotion-w)
 map  b <Plug>(easymotion-b)
 map  e <Plug>(easymotion-lineforward)
 let g:EasyMotion_smartcase = 1
-
+ let g:EasyMotion_keys='asdf12345qwertgzxcv'
 "dap
 nnoremap <silent> <F5> :lua require'dap'.continue()<CR>
 nnoremap <silent> <F10> :lua require'dap'.step_over()<CR>
@@ -109,20 +116,14 @@ nnoremap <silent> <F11> :lua require'dap'.step_into()<CR>
 nnoremap <silent> <F12> :lua require'dap'.step_out()<CR>
 nnoremap <F9> :lua require'dap'.toggle_breakpoint()<CR>
 
-"ultest
-nnoremap <leader>tf <cmd>Ultest <CR> 
-nnoremap <leader>tl <cmd>UltestLast <CR>
-nnoremap <leader>ts <cmd>UltestSummary <CR>
-nnoremap <leader>tn <cmd>UltestNearest <CR>
-nnoremap <leader>tc <cmd>UltestClear <CR>
-
 "goto-preview
-nnoremap <leader>ps <cmd>lua require('goto-preview').goto_preview_references()<CR>
+nnoremap <leader>pr <cmd>lua require('goto-preview').goto_preview_references()<CR>
+nnoremap <leader>ps <cmd>lua require('goto-preview').goto_preview_definition()<CR>
+nnoremap <leader>pi <cmd>lua require('goto-preview').goto_preview_implementation()<CR>
 nnoremap <leader>pc <cmd>lua require('goto-preview').close_all_win()<CR>
 "symbols-outline
 nnoremap <leader>a :SymbolsOutline<CR>
 "nvim-tree
-"nnoremap <leader>z :NvimTreeToggle ./<CR>
 nnoremap <leader>z :NvimTreeFindFileToggle <CR>
 "lazygit
 nnoremap lgt :LazyGit <CR>

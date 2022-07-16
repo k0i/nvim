@@ -130,14 +130,55 @@ dap.configurations.go = {
 }
 EOF
 '''
-
+[[plugins]]
+repo = 'hrsh7th/cmp-vsnip'
+[[plugins]]
+repo = 'hrsh7th/vim-vsnip'
+[[plugins]]
+ repo = 'hrsh7th/vim-vsnip-integ'
 [[plugins]]
 repo ='simrat39/rust-tools.nvim'
 on_ft="rust"
-depends = ['plenary.nvim','nvim-dap','nvim-cmp']
+depends = ['plenary.nvim','nvim-dap','nvim-cmp','nvim-navic']
+on_lua = "rust-tools"
 hook_post_source='''
 lua <<EOF
+local navic = require("nvim-navic")
+navic.setup {
+      icons = {
+    File = ' ',
+    Module = ' ',
+    Namespace = ' ',
+    Package = ' ',
+    Class = ' ',
+    Method = ' ',
+    Property = ' ',
+    Field = ' ',
+    Constructor = ' ',
+    Enum = ' ',
+    Interface = ' ',
+    Function = ' ',
+    Variable = ' ',
+    Constant = ' ',
+    String = ' ',
+    Number = ' ',
+    Boolean = ' ',
+    Array = ' ',
+    Object = ' ',
+    Key = ' ',
+    Null = ' ',
+    EnumMember = ' ',
+    Struct = ' ',
+    Event = ' ',
+    Operator = ' ',
+    TypeParameter = ' '
+  },
+    separator = " / ",
+    depth_limit = 3,
+    depth_limit_indicator = "..",
+}
 local on_attach = function(client, bufnr)
+   navic.attach(client, bufnr)
    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
    local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
    buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
@@ -158,7 +199,7 @@ local on_attach = function(client, bufnr)
    buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
    buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
    buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.diagnostic.open_float({scope="line"})<CR>', opts)
    buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
    buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
    buf_set_keymap("n", "<F5>", "<cmd>RustDebuggables<CR>", opts)
@@ -168,6 +209,7 @@ local on_attach = function(client, bufnr)
    buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 end
 local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
    vim.lsp.diagnostic.on_publish_diagnostics, {
@@ -181,15 +223,6 @@ local codelldb_path = extension_path .. 'adapter/codelldb'
 local liblldb_path = extension_path .. 'lldb/lib/liblldb.so'
 local opts = {
    tools = {
-      autoSetHints = true,
-      hover_with_actions = true,
-      inlay_hints = {
-         only_current_line = false,
-         show_parameter_hints = true,
-         other_hints_prefix = "::",
-         parameter_hints_prefix = "<=",
-         highlight = "Comment",
-      },
       hover_actions ={
         auto_focus  = true,
       }
@@ -228,15 +261,13 @@ repo = 'hrsh7th/cmp-cmdline'
 repo = 'ray-x/lsp_signature.nvim'
 [[plugins]]
 repo = 'hrsh7th/nvim-cmp'
-depends = ['nvim-lspconfig', 'cmp-nvim-lsp', 'cmp-buffer','cmp-path','cmp-cmdline','lspkind.nvim','lsp_signature.nvim']
+depends = ['nvim-lspconfig', 'cmp-nvim-lsp', 'cmp-buffer','cmp-path','cmp-cmdline','lspkind.nvim','lsp_signature.nvim','vim-vsnip-integ','vim-vsnip', 'cmp-vsnip','nvim-navic']
 on_lua = "cmp"
-hook_add = """
+hook_post_source = """
 lua <<EOF
 local cmp = require'cmp'
 local lspkind = require('lspkind')
-local winhighlight = {
-  winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:PmenuSel",
-}
+
 cmp.setup({
    snippet = {
       expand = function(args)
@@ -244,8 +275,8 @@ cmp.setup({
       end,
    },
     window = {
-    completion = cmp.config.window.bordered(winhighlight),
-    documentation = cmp.config.window.bordered(winhighlight),
+    completion = cmp.config.window.bordered(),
+    documentation = cmp.config.window.bordered(),
   },
   formatting = {
     format = lspkind.cmp_format({
@@ -285,10 +316,46 @@ cmp.setup.cmdline(':', {
         { name = 'cmdline' }
       })
 })
-local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
 local lspconfig = require('lspconfig')
 local servers = {  'gopls','hls', 'vuels','clangd' }
+local navic = require("nvim-navic")
+navic.setup {
+    separator = " / ",
+    depth_limit = 3,
+    depth_limit_indicator = "..",
+      icons = {
+    File = ' ',
+    Module = ' ',
+    Namespace = ' ',
+    Package = ' ',
+    Class = ' ',
+    Method = ' ',
+    Property = ' ',
+    Field = ' ',
+    Constructor = ' ',
+    Enum = ' ',
+    Interface = ' ',
+    Function = ' ',
+    Variable = ' ',
+    Constant = ' ',
+    String = ' ',
+    Number = ' ',
+    Boolean = ' ',
+    Array = ' ',
+    Object = ' ',
+    Key = ' ',
+    Null = ' ',
+    EnumMember = ' ',
+    Struct = ' ',
+    Event = ' ',
+    Operator = ' ',
+    TypeParameter = ' '
+  }
+}
 local on_attach = function(client, bufnr)
+   navic.attach(client, bufnr)
    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
    local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
    local opts = { noremap = true, silent = true }
@@ -304,7 +371,7 @@ local on_attach = function(client, bufnr)
    buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
    buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
    buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.diagnostic.open_float({scope="line"})<CR>', opts)
    buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
    buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
    buf_set_keymap("n", "<F5>", "<cmd>lua require'dap'.continue()<CR>", opts)
@@ -345,17 +412,20 @@ EOF
 """
 [[plugins]]
 repo = 'folke/twilight.nvim'
-depends =['nvim-treesitter']
-[[plugins]]
-repo = 'vim-test/vim-test'
-hook_add="""
+on_lua = "twilight"
+hook_add ="""
+lua << EOF
+require("twilight").setup{
+ context = 20,
+   dimming = {
+    alpha = 0.9,
+    color = { "#E0B0FF" },
+  },
+}
+EOF
 """
 [[plugins]]
-repo = 'antoinemadec/FixCursorHold.nvim'
-[[plugins]]
-repo = 'nvim-neotest/neotest'
-depends = ['FixCursorHold.nvim','plenary.nvim','nvim-treesitter']
-on_lua = 'neotest'
+repo = 'vim-test/vim-test'
 hook_add="""
 """
 [[plugins]]
@@ -371,16 +441,7 @@ require("lsp-colors").setup({
 })
 EOF
 """
-[[plugins]]
-repo = 'ray-x/go.nvim'
-depends = ['nvim-treesitter']
-on_ft="go"
-on_lua = 'go'
-on_add ="""
-lua << EOF
-require('go').setup()
-EOF
-"""
+
 [[plugins]]
 repo = 'theHamsta/nvim-dap-virtual-text'
 depends = ['nvim-treesitter','dap']
@@ -509,7 +570,11 @@ repo = 'rmagatti/goto-preview'
 on_lua = 'goto-preview'
 hook_add ="""
 lua << EOF
-require('goto-preview').setup{}
+require('goto-preview').setup{
+  width = 140,
+  height = 40,
+  opacity = 60,
+}
 EOF
 """
 [[plugins]]
@@ -523,9 +588,9 @@ vim.g.symbols_outline = {
     auto_preview = true,
     position = 'left',
     relative_width = true,
-    width = 50,
+    width = 30,
     auto_close = false,
-    show_numbers = false,
+    show_numbers = true,
     show_relative_numbers = false,
     show_symbol_details = true,
     preview_bg_highlight = 'Pmenu',
@@ -585,11 +650,16 @@ EOF
 [[plugins]]
 repo = "kdheepak/lazygit.nvim"
 [[plugins]]
-repo = "karb94/neoscroll.nvim"
-on_lua = "neoscroll"
+repo = "declancm/cinnamon.nvim"
+on_lua = "cinnamon"
 hook_add ="""
 lua <<EOF
-require('neoscroll').setup{}
+require('cinnamon').setup{
+ extra_keymaps = true,
+  override_keymaps = true,
+  max_length = 500,
+  scroll_limit = -1,
+}
 EOF
 """
 [[plugins]]
@@ -626,26 +696,18 @@ on_cmd = "Telescope"
 depends = ["nvim-neoclip.lua","telescope-project.nvim"]
 hook_add = """
 lua << EOF
-require('telescope').setup()
+require('telescope').setup{}
 EOF
 """
 [[plugins]]
-repo = "SmiteshP/nvim-gps"
-
-depends = ["nvim-treesitter"]
-on_lua = "nvim-gps"
-hook_add ="""
-lua <<EOF
-require('nvim-gps').setup{}
-EOF
-"""
+repo = "SmiteshP/nvim-navic"
 [[plugins]]
 repo = "nvim-lualine/lualine.nvim"
 on_lua = "lualine"
-depends = ["nvim-gps"]
+depends = ["nvim-navic"]
 hook_post_source ="""
 lua <<EOF
-local gps = require("nvim-gps")
+local navic = require("nvim-navic")
 local colors = {
   red = '#ca1243',
   blue = '#0088dc',
@@ -758,7 +820,7 @@ require('lualine').setup {
         end,
       },
     },
-    lualine_c = {{ gps.get_location, cond = gps.is_available },},
+    lualine_c = {{ navic.get_location, cond = navic.is_available },},
     lualine_x = { 'filetype' },
     lualine_y = { search_result },
     lualine_z = { '%l:%c' },
@@ -773,9 +835,9 @@ EOF
 [[plugins]]
 repo = "akinsho/flutter-tools.nvim"
 on_ft = "dart"
-depends = ["plenary.nvim","nvim-cmp"]
+depends = ["plenary.nvim","nvim-cmp","nvim-navic"]
 on_lua = "flutter-tools"
-hook_add ="""
+hook_post_source ="""
 lua <<EOF
 local cmp = require'cmp'
   local lspkind = require('lspkind')
@@ -825,7 +887,11 @@ local cmp = require'cmp'
   })
   local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
   local lspconfig = require('lspconfig')
+  local navic = require("nvim-navic")
+  navic.setup {
+}
   local on_attach = function(client, bufnr)
+   navic.attach(client, bufnr)
    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
    local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
    local opts = { noremap = true, silent = true }
@@ -841,7 +907,7 @@ local cmp = require'cmp'
    buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
    buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
    buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.diagnostic.open_float({scope="line"})<CR>', opts)
    buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
    buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
    buf_set_keymap("n", "<F5>", "<cmd>lua require'dap'.continue()<CR>", opts)
@@ -931,12 +997,13 @@ cmp.setup.cmdline(':', {
 })
 local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 local lspconfig = require('lspconfig')
-local servers = { 'gopls', 'rust_analyzer', 'hls' }
+local servers = {  'tsserver' }
 local on_attach = function(client, bufnr)
    local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-
    local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-
+   local ts_utils = require("nvim-lsp-ts-utils")
+     ts_utils.setup({})
+     ts_utils.setup_client(client)
    local opts = { noremap = true, silent = true }
    buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
    buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
@@ -950,7 +1017,7 @@ local on_attach = function(client, bufnr)
    buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
    buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
    buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
+   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.diagnostic.open_float({scope="line"})<CR>', opts)
    buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
    buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
    buf_set_keymap("n", "<F5>", "<cmd>lua require'dap'.continue()<CR>", opts)
@@ -970,6 +1037,17 @@ for _, lsp in ipairs(servers) do
       capabilities = capabilities,
    }
 end
+local null_ls = require("null-ls")
+
+null_ls.setup({
+   sources = {
+      null_ls.builtins.diagnostics.eslint,
+      null_ls.builtins.code_actions.eslint,
+      null_ls.builtins.formatting.prettier,
+   },
+   on_attach = on_attach,
+   capabilities = capabilities,
+})
 
 
 local cmp = require 'cmp'
@@ -1024,72 +1102,6 @@ cmp.setup.cmdline(':', {
    }, {
       { name = 'cmdline' }
    })
-})
-local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
-local lspconfig = require("lspconfig")
-local null_ls = require("null-ls")
-local buf_map = function(bufnr, mode, lhs, rhs, opts)
-   vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, opts or {
-      silent = true,
-   })
-end
-local on_attach = function(client, bufnr)
-   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-
-   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-
-   local opts = { noremap = true, silent = true }
-   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
-   buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-   buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
-   buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-   buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-   buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-   buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-   buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-   buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.lsp.diagnostic.show_line_diagnostics()<CR>', opts)
-   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-   buf_set_keymap("n", "<F5>", "<cmd>lua require'dap'.continue()<CR>", opts)
-   buf_set_keymap('n', '<Leader>p', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
-   buf_set_keymap('n', '<Leader>n', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
-   buf_set_keymap("n", "<Leader>s", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
-   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-   cfg = {
-      hint_prefix = "ПФ 🤔 : ",
-      transparency = 30,
-   }
-   require "lsp_signature".on_attach(cfg, bufnr)
-   if client.resolved_capabilities.document_formatting then
-      vim.cmd("autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_sync()")
-   end
-end
-lspconfig.tsserver.setup({
-   on_attach = function(client, bufnr)
-      client.resolved_capabilities.document_formatting = false
-      client.resolved_capabilities.document_range_formatting = false
-      local ts_utils = require("nvim-lsp-ts-utils")
-      ts_utils.setup({})
-      ts_utils.setup_client(client)
-      buf_map(bufnr, "n", "gs", ":TSLspOrganize<CR>")
-      buf_map(bufnr, "n", "gi", ":TSLspRenameFile<CR>")
-      buf_map(bufnr, "n", "go", ":TSLspImportAll<CR>")
-      on_attach(client, bufnr)
-   end,
-   capabilities = capabilities,
-})
-null_ls.setup({
-   sources = {
-      null_ls.builtins.diagnostics.eslint,
-      null_ls.builtins.code_actions.eslint,
-      null_ls.builtins.formatting.prettier,
-   },
-   on_attach = on_attach,
-   capabilities = capabilities,
 })
 EOF
 """
@@ -1167,9 +1179,9 @@ EOF
 [[plugin]]
 repo = "tamton-aquib/zone.nvim"
 on_lua = "zone"
-hook_add ="""
+hook_post_source ="""
 lua << EOF
-require('zone').setup {
+require'zone'.setup {
     style = "treadmill",
     after = 3,          -- Idle timeout
     -- More options to come later
@@ -1178,10 +1190,31 @@ require('zone').setup {
         direction = "left",
         -- Opts for Treadmill style
     },
-    dvd = {
-        -- Opts for Dvd style
-    },
-    -- etc
 }
+EOF
+"""
+[[plugins]]
+repo = "antoinemadec/FixCursorHold.nvim"
+[[plugins]]
+repo = "nvim-neotest/neotest-go"
+[[plugins]]
+repo = "nvim-neotest/neotest"
+depends = ["FixCursorHold.nvim","plenary.nvim","nvim-treesitter","neotest-go"]
+on_lua = "neotest"
+hook_add ="""
+lua << EOF
+  require'neotest'.setup({
+      adapters = {
+        require('neotest-go')({dap = { justMyCode = false },}),
+      }
+    })
+EOF
+"""
+[[plugins]]
+repo = 'nanozuki/tabby.nvim'
+on_lua = "tabby"
+hook_add ="""
+lua << EOF
+require("tabby").setup({})
 EOF
 """

@@ -4,8 +4,6 @@ repo = 'easymotion/vim-easymotion'
 repo = 'rust-lang/rust.vim'
 on_ft = 'rust'
 [[plugins]]
-repo = 'nvim-lua/completion-nvim'
-[[plugins]]
 repo = 'neovim/nvim-lspconfig'
 [[plugins]]
 repo = 'github/copilot.vim'
@@ -18,12 +16,6 @@ repo = 'wakatime/vim-wakatime'
 [[plugins]]
 repo = 'shaunsingh/moonlight.nvim'
 [[plugins]]
-repo = 'sainnhe/edge'
-[[plugins]]
-repo = 'hrsh7th/vim-vsnip'
-[[plugins]]
- repo = 'hrsh7th/vim-vsnip-integ'
-[[plugins]]
 repo = 'ryanoasis/vim-devicons'
 [[plugins]]
 repo = 'simeji/winresizer'
@@ -31,3 +23,4 @@ repo = 'simeji/winresizer'
 repo = 'nvim-lua/plenary.nvim'
 [[plugins]]
 repo = 'IMOKURI/line-number-interval.nvim'
+
