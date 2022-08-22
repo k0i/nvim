@@ -17,25 +17,29 @@ lua <<EOF
 require('dap.ext.vscode').load_launchjs()
 require("dapui").setup({
   icons = { expanded = "-", collapsed = "+" },
-  sidebar = {
-    elements = {
-      { id = "watches", size = 0.00 },
-      { id = "breakpoints", size = 0.2},
-      {
-        id = "scopes",
-        size = 0.8, 
+  layouts = {
+    {
+      elements = {
+        { id = "watches", size = 0.00 },
+        { id = "breakpoints", size = 0.2},
+        {
+          id = "scopes",
+          size = 0.8, 
+        },
+        { id = "stacks", size = 0.0},
       },
-      { id = "stacks", size = 0.0},
+      size = 60,
+      position = "right",
     },
-    size = 100
-    ,
-    position = "right",
-  },
-  tray = {
-    elements = { "repl" },
-    size = 10,
-    position = "top",
-  },
+    {
+      elements = {
+        "repl",
+        "console",
+      },
+      size = 0.5, -- 25% of total lines
+      position = "bottom",
+    },
+},
    floating = {
     max_height = 0.8,
     max_width = 0.9,
@@ -202,14 +206,13 @@ local on_attach = function(client, bufnr)
    buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.diagnostic.open_float({scope="line"})<CR>', opts)
    buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
    buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-   buf_set_keymap("n", "<F5>", "<cmd>RustDebuggables<CR>", opts)
+   buf_set_keymap("n", "<F5>", "<cmd>lua require'dap'.continue()<CR>", opts)
    buf_set_keymap('n', '<Leader>p', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
    buf_set_keymap('n', '<Leader>n', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
    buf_set_keymap("n", "<Leader>s", "<cmd>lua require'rust-tools.hover_actions'.hover_actions()<CR>", opts)
    buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
 end
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
    vim.lsp.diagnostic.on_publish_diagnostics, {
@@ -218,23 +221,33 @@ vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
       update_in_insert = true,
    }
 )
-local extension_path = '/home/koyam/.vscode-server/extensions/vadimcn.vscode-lldb-1.7.0/'
+local extension_path = '/home/koyam/extensions/vscode-lldb/'
 local codelldb_path = extension_path .. 'adapter/codelldb'
 local liblldb_path = extension_path .. 'lldb/lib/liblldb.so'
 local opts = {
    tools = {
+      executor = require("rust-tools/executors").termopen,
       hover_actions ={
         auto_focus  = true,
-      }
-   },
+      },
+   inlay_hints = {
+      auto = true,
+      only_current_line = false,
+      show_parameter_hints = true,
+      parameter_hints_prefix = "<<< ",
+      other_hints_prefix = "===> ",
+      max_len_align = false,
+      max_len_align_padding = 1,
+      highlight = "Comment",
+    }
+  },
    dap = {
-        adapter = require('rust-tools.dap').get_codelldb_adapter(
-            codelldb_path, liblldb_path)
+            adapter = require('rust-tools.dap').get_codelldb_adapter(
+            "/home/koyam/extensions/vscode-lldb/adapter/codelldb", "/home/koyam/extensions/vscode-lldb/lldb/lib/liblldb.so")
    },
    server = {
       on_attach = on_attach,
       capabilities = capabilities,
-      standalone = false,
       settings = {
          ["rust-analyzer"] = {
             checkOnSave = {
@@ -261,8 +274,9 @@ repo = 'hrsh7th/cmp-cmdline'
 repo = 'ray-x/lsp_signature.nvim'
 [[plugins]]
 repo = 'hrsh7th/nvim-cmp'
-depends = ['nvim-lspconfig', 'cmp-nvim-lsp', 'cmp-buffer','cmp-path','cmp-cmdline','lspkind.nvim','lsp_signature.nvim','vim-vsnip-integ','vim-vsnip', 'cmp-vsnip','nvim-navic']
+depends = ['nvim-lspconfig', 'cmp-nvim-lsp', 'cmp-buffer','cmp-path','cmp-cmdline','lspkind.nvim','lsp_signature.nvim','vim-vsnip-integ','vim-vsnip', 'cmp-vsnip','nvim-navic', 'null-ls.nvim']
 on_lua = "cmp"
+on_ft=["go","typescript","typescriptreact", "cpp", "c", "ruby"]
 hook_post_source = """
 lua <<EOF
 local cmp = require'cmp'
@@ -316,10 +330,9 @@ cmp.setup.cmdline(':', {
         { name = 'cmdline' }
       })
 })
-local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
 local lspconfig = require('lspconfig')
-local servers = {  'gopls','hls', 'vuels','clangd' }
+local servers = { 'gopls', 'hls', 'vuels', 'sqls', 'pyright', 'solargraph', 'typeprof' }
 local navic = require("nvim-navic")
 navic.setup {
     separator = " / ",
@@ -389,8 +402,23 @@ for _, lsp in ipairs(servers) do
    lspconfig[lsp].setup {
       on_attach = on_attach,
       capabilities = capabilities,
+      single_file_support = true,
    }
 end
+lspconfig.tsserver.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  filetypes = {"javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx"},
+  cmd = { "typescript-language-server", "--stdio" }
+}
+capabilities.offsetEncoding = "utf-8"
+lspconfig.clangd.setup {
+  on_attach = on_attach,
+  capabilities = capabilities,
+  filetypes = {"c", "cpp", "objc", "objcpp", "cuda", "proto"},
+  cmd = { "clangd" },
+  single_file_support = true,
+}
 EOF
 """
 [[plugins]]
@@ -462,15 +490,6 @@ on_lua = 'fidget'
 hook_add ="""
 lua << EOF
 require"fidget".setup{}
-EOF
-"""
-[[plugins]]
-repo = 'm-demare/hlargs.nvim'
-on_lua = 'hlargs'
-depends = ['nvim-treesitter']
-hook_add ="""
-lua << EOF
-require('hlargs').setup{}
 EOF
 """
 [[plugins]]
@@ -573,38 +592,24 @@ lua << EOF
 require('goto-preview').setup{
   width = 140,
   height = 40,
-  opacity = 60,
+  opacity = 90,
 }
 EOF
 """
 [[plugins]]
 repo = 'simrat39/symbols-outline.nvim'
-on_lua = 'symbols_outline'
+on_lua = 'symbols-outline'
 hook_add ="""
 lua << EOF
-vim.g.symbols_outline = {
+ require("symbols-outline").setup({
     highlight_hovered_item = true,
     show_guides = true,
     auto_preview = true,
     position = 'left',
     relative_width = true,
-    width = 30,
-    auto_close = false,
+    width = 40,
+    auto_close = true,
     show_numbers = true,
-    show_relative_numbers = false,
-    show_symbol_details = true,
-    preview_bg_highlight = 'Pmenu',
-    keymaps = { -- These keymaps can be a string or a table for multiple keys
-        close = {"<Esc>", "q"},
-        goto_location = "<Cr>",
-        focus_location = "o",
-        hover_symbol = "<C-space>",
-        toggle_preview = "K",
-        rename_symbol = "r",
-        code_actions = "a",
-    },
-    lsp_blacklist = {},
-    symbol_blacklist = {},
     symbols = {
         File = {icon = "", hl = "TSURI"},
         Module = {icon = "", hl = "TSNamespace"},
@@ -633,7 +638,7 @@ vim.g.symbols_outline = {
         Operator = {icon = "+", hl = "TSOperator"},
         TypeParameter = {icon = "𝙏", hl = "TSParameter"}
     }
-}
+})
 EOF
 """
 [[plugins]]
@@ -678,12 +683,17 @@ require("indent_blankline").setup {
 EOF
 """
 [[plugins]]
-repo = "akinsho/toggleterm.nvim"
-on_lua = "toggleterm"
+repo = "numToStr/FTerm.nvim"
+on_lua = "FTerm"
 hook_add ="""
 lua <<EOF
-require('toggleterm').setup{
-size = 30
+require('FTerm').setup{
+    border = 'double',
+    dimensions  = {
+        height = 0.9,
+        width = 0.9,
+    },
+    blend = 30
 }
 EOF
 """
@@ -693,10 +703,14 @@ repo = "nvim-telescope/telescope-project.nvim"
 repo = "nvim-telescope/telescope.nvim"
 on_lua = "telescope"
 on_cmd = "Telescope"
-depends = ["nvim-neoclip.lua","telescope-project.nvim"]
+depends = ["telescope-project.nvim"]
 hook_add = """
 lua << EOF
-require('telescope').setup{}
+require('telescope').setup{
+defaults = {
+winblend = 20
+}
+}
 EOF
 """
 [[plugins]]
@@ -885,7 +899,7 @@ local cmp = require'cmp'
       { name = 'cmdline' }
     })
   })
-  local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+  local capabilities = require('cmp_nvim_lsp').default_capabilities()
   local lspconfig = require('lspconfig')
   local navic = require("nvim-navic")
   navic.setup {
@@ -934,178 +948,6 @@ require('flutter-tools').setup{
 EOF
 """
 [[plugins]]
-repo = "jose-elias-alvarez/null-ls.nvim"
-on_lua = "null-ls"
-[[plugins]]
-repo = "jose-elias-alvarez/nvim-lsp-ts-utils"
-depends = ["plenary.nvim","nvim-cmp","null-ls.nvim"]
-on_lua = "nvim-lsp-ts-utils"
-hook_add = """
-lua << EOF
-local cmp = require 'cmp'
-local lspkind = require('lspkind')
-local winhighlight = {
-   winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:PmenuSel",
-}
-cmp.setup({
-   snippet = {
-      expand = function(args)
-         vim.fn["vsnip#anonymous"](args.body)
-      end,
-   },
-   window = {
-      completion = cmp.config.window.bordered(winhighlight),
-      documentation = cmp.config.window.bordered(winhighlight),
-   },
-   formatting = {
-      format = lspkind.cmp_format({
-         mode = 'symbol',
-         maxwidth = 100,
-         before = function(entry, vim_item)
-            return vim_item
-         end
-      })
-   },
-   mapping = cmp.mapping.preset.insert({
-      ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-      ['<C-f>'] = cmp.mapping.scroll_docs(4),
-      ['<C-Space>'] = cmp.mapping.complete(),
-      ['<C-e>'] = cmp.mapping.abort(),
-      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-   }),
-   sources = cmp.config.sources({
-      { name = 'nvim_lsp' },
-      { name = 'vsnip' },
-      {
-         { name = 'buffer' }
-      }
-   }),
-})
-cmp.setup.cmdline('/', {
-   mapping = cmp.mapping.preset.cmdline(),
-   sources = {
-      { name = 'buffer' }
-   }
-})
-cmp.setup.cmdline(':', {
-   mapping = cmp.mapping.preset.cmdline(),
-   sources = cmp.config.sources({
-      { name = 'path' }
-   }, {
-      { name = 'cmdline' }
-   })
-})
-local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
-local lspconfig = require('lspconfig')
-local servers = {  'tsserver' }
-local on_attach = function(client, bufnr)
-   local function buf_set_keymap(...) vim.api.nvim_buf_set_keymap(bufnr, ...) end
-   local function buf_set_option(...) vim.api.nvim_buf_set_option(bufnr, ...) end
-   local ts_utils = require("nvim-lsp-ts-utils")
-     ts_utils.setup({})
-     ts_utils.setup_client(client)
-   local opts = { noremap = true, silent = true }
-   buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
-   buf_set_keymap('n', 'gD', '<Cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-   buf_set_keymap('n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
-   buf_set_keymap('n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
-   buf_set_keymap('n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
-   buf_set_keymap('n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
-   buf_set_keymap('n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
-   buf_set_keymap('n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-   buf_set_keymap('n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
-   buf_set_keymap('n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
-   buf_set_keymap('n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
-   buf_set_keymap('n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
-   buf_set_keymap('n', '<Leader>e', '<cmd>lua vim.diagnostic.open_float({scope="line"})<CR>', opts)
-   buf_set_keymap('n', '<space>q', '<cmd>lua vim.lsp.diagnostic.set_loclist()<CR>', opts)
-   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-   buf_set_keymap("n", "<F5>", "<cmd>lua require'dap'.continue()<CR>", opts)
-   buf_set_keymap('n', '<Leader>p', '<cmd>lua vim.lsp.diagnostic.goto_prev()<CR>', opts)
-   buf_set_keymap('n', '<Leader>n', '<cmd>lua vim.lsp.diagnostic.goto_next()<CR>', opts)
-   buf_set_keymap("n", "<Leader>s", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
-   buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
-   cfg = {
-      hint_prefix = "ПФ 🤔 : ",
-      transparency = 30,
-   }
-   require "lsp_signature".on_attach(cfg, bufnr)
-end
-for _, lsp in ipairs(servers) do
-   lspconfig[lsp].setup {
-      on_attach = on_attach,
-      capabilities = capabilities,
-   }
-end
-local null_ls = require("null-ls")
-
-null_ls.setup({
-   sources = {
-      null_ls.builtins.diagnostics.eslint,
-      null_ls.builtins.code_actions.eslint,
-      null_ls.builtins.formatting.prettier,
-   },
-   on_attach = on_attach,
-   capabilities = capabilities,
-})
-
-
-local cmp = require 'cmp'
-local lspkind = require('lspkind')
-local winhighlight = {
-   winhighlight = "Normal:NormalFloat,FloatBorder:FloatBorder,CursorLine:PmenuSel",
-}
-cmp.setup({
-   snippet = {
-      expand = function(args)
-         vim.fn["vsnip#anonymous"](args.body)
-      end,
-   },
-   window = {
-      completion = cmp.config.window.bordered(winhighlight),
-      documentation = cmp.config.window.bordered(winhighlight),
-   },
-   formatting = {
-      format = lspkind.cmp_format({
-         mode = 'symbol',
-         maxwidth = 100,
-         before = function(entry, vim_item)
-            return vim_item
-         end
-      })
-   },
-   mapping = cmp.mapping.preset.insert({
-      ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-      ['<C-f>'] = cmp.mapping.scroll_docs(4),
-      ['<C-Space>'] = cmp.mapping.complete(),
-      ['<C-e>'] = cmp.mapping.abort(),
-      ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-   }),
-   sources = cmp.config.sources({
-      { name = 'nvim_lsp' },
-      { name = 'vsnip' },
-      {
-         { name = 'buffer' }
-      }
-   }),
-})
-cmp.setup.cmdline('/', {
-   mapping = cmp.mapping.preset.cmdline(),
-   sources = {
-      { name = 'buffer' }
-   }
-})
-cmp.setup.cmdline(':', {
-   mapping = cmp.mapping.preset.cmdline(),
-   sources = cmp.config.sources({
-      { name = 'path' }
-   }, {
-      { name = 'cmdline' }
-   })
-})
-EOF
-"""
-[[plugins]]
 repo = "AckslD/nvim-neoclip.lua"
 depends = ["telescope.nvim"]
 on_lua = "neoclip"
@@ -1117,8 +959,8 @@ require('neoclip').setup({
           i = {
             paste = '<cr>',
             paste_behind = '<c-k>',
-            replay = '<c-q>',  -- replay a macro
-            delete = '<c-d>',  -- delete an entry
+            replay = '<c-q>',  
+            delete = '<c-d>',  
             custom = {},
           },
           n = {
@@ -1139,6 +981,8 @@ on_lua = "nvim-tree"
 hook_add = """
 lua <<EOF
 require'nvim-tree'.setup {
+   hijack_netrw = false,
+   disable_netrw = false,
   view = {
     side ="right",
     width = 50
@@ -1160,22 +1004,22 @@ require'nvim-tree'.setup {
   }
 EOF
 """
-[[plugins]]
-repo = "lewis6991/gitsigns.nvim"
-on_lua = "gitsigns"
-hook_add = """
-lua << EOF
-require('gitsigns').setup{
- signs = {
-    add          = {hl = 'GitSignsAdd'   , text = 'a', numhl='GitSignsAddNr'   , linehl='GitSignsAddLn'},
-    change       = {hl = 'GitSignsChange', text = 'c', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn'},
-    delete       = {hl = 'GitSignsDelete', text = 'd', numhl='GitSignsDeleteNr', linehl='GitSignsDeleteLn'},
-    topdelete    = {hl = 'GitSignsDelete', text = 't', numhl='GitSignsDeleteNr', linehl='GitSignsDeleteLn'},
-    changedelete = {hl = 'GitSignsChange', text = 'e', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn'},
-  },
-}
-EOF
-"""
+#[[plugins]]
+#repo = "lewis6991/gitsigns.nvim"
+#on_lua = "gitsigns"
+#hook_add = """
+#lua << EOF
+#require('gitsigns').setup{
+# signs = {
+#    add          = {hl = 'GitSignsAdd'   , text = 'a', numhl='GitSignsAddNr'   , linehl='GitSignsAddLn'},
+#    change       = {hl = 'GitSignsChange', text = 'c', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn'},
+#    delete       = {hl = 'GitSignsDelete', text = 'd', numhl='GitSignsDeleteNr', linehl='GitSignsDeleteLn'},
+#    topdelete    = {hl = 'GitSignsDelete', text = 't', numhl='GitSignsDeleteNr', linehl='GitSignsDeleteLn'},
+#    changedelete = {hl = 'GitSignsChange', text = 'e', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn'},
+#  },
+#}
+#EOF
+#"""
 [[plugin]]
 repo = "tamton-aquib/zone.nvim"
 on_lua = "zone"
@@ -1218,3 +1062,80 @@ lua << EOF
 require("tabby").setup({})
 EOF
 """
+[[plugins]]
+repo = "nvim-pack/nvim-spectre"
+on_lua = "spectre"
+hook_add ="""
+lua << EOF
+  require('spectre').setup()
+EOF
+"""
+
+[[plugins]]
+repo = "nanotee/sqls.nvim"
+[[plugins]]
+repo = "jose-elias-alvarez/null-ls.nvim"
+on_lua = "null-ls"
+hook_add = """
+lua << EOF
+local status, null_ls = pcall(require, "null-ls")
+if (not status) then return end
+local augroup = vim.api.nvim_create_augroup("LspFormatting", {})
+null_ls.setup({
+  vim.cmd("autocmd BufWritePost *.js,*.jsx,*.ts,*.tsx :Prettier"),
+   on_attach = function(client, bufnr)
+        if client.supports_method("textDocument/formatting") then
+            vim.api.nvim_clear_autocmds({ group = augroup, buffer = bufnr })
+            vim.api.nvim_create_autocmd("BufWritePre", {
+                group = augroup,
+                buffer = bufnr,
+                callback = function()
+                    vim.lsp.buf.format({ bufnr = bufnr })
+                end,
+            })
+        end
+    end,
+  sources = {
+    null_ls.builtins.formatting.prettierd,
+    null_ls.builtins.diagnostics.clang_check,
+    null_ls.builtins.formatting.clang_format
+  }
+})
+EOF
+"""
+[[plugins]]
+repo = "MunifTanjim/prettier.nvim"
+on_lua = "prettier"
+hook_add = """
+lua << EOF
+require("prettier").setup {
+  bin = 'prettierd',
+  filetypes = {
+    "css",
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "json",
+    "scss",
+    "less"
+  }
+}
+EOF
+"""
+
+[[plugins]]
+repo="iamcco/markdown-preview.nvim"
+on_ft="markdown"
+build='sh -c "cd app && yarn install"'
+#[[plugins]]
+#repo="norcalli/nvim-colorizer.lua"
+#on_lua="colorizer"
+#hook_add = """
+#lua << EOF
+#require'colorizer'.setup()
+#EOF
+#"""
+#[[plugins]]
+#repo = "dense-analysis/ale"
+#on_ft = ["ruby"]

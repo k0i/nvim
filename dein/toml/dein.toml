@@ -11,8 +11,6 @@ repo = 'github/copilot.vim'
 repo = 'APZelos/blamer.nvim'
 [[plugins]]
 repo = 'wakatime/vim-wakatime'
-#[[plugins]]
-#repo = '4513ECHO/vim-colors-hatsunemiku'
 [[plugins]]
 repo = 'shaunsingh/moonlight.nvim'
 [[plugins]]

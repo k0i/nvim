@@ -6,6 +6,7 @@ let s:toml_dir  = $HOME . '/.config/nvim/dein/toml'
 let s:toml      = s:toml_dir . '/dein.toml'
 let s:lazy_toml = s:toml_dir . '/lazy.toml'
 call dein#add('/home/koyam/.cache/dein/repos/github.com/Shougo/dein.vim')
+call dein#add('nvim-treesitter/nvim-treesitter-textobjects')
 call dein#add('nvim-treesitter/nvim-treesitter',{'merged' : 0})
 call dein#load_toml(s:toml, {'lazy' : 0})
 call dein#load_toml(s:lazy_toml, {'lazy' : 1})
@@ -22,11 +23,56 @@ require'nvim-treesitter.configs'.setup {
   highlight = {
     enable = true,
     additional_vim_regex_highlighting = false,
+  },
+  textobjects = {
+    select={
+      enable = true,
+      lookahead = true,
+      keymaps = {
+        ["fo"] = "@function.outer",
+        ["fi"] = "@function.inner",
+        ["co"] = "@class.outer",
+        ["ci"] = "@class.inner",
+      },
+      selection_modes = {
+        ['@parameter.outer'] = 'v', 
+        ['@function.outer'] = 'V', 
+        ['@class.outer'] = '<c-v>', 
+      },
+    },
+     swap = {
+      enable = true,
+      swap_next = {
+        ["sw"] = "@parameter.inner",
+      },
+      swap_previous = {
+        ["sW"] = "@parameter.inner",
+      },
+    },
+     move = {
+      enable = true,
+      set_jumps = true,
+      goto_next_start = {
+        ["ll"] = "@function.outer",
+        ["]]"] = "@class.outer",
+      },
+      goto_next_end = {
+        ["kk"] = "@function.outer",
+        ["]["] = "@class.outer",
+      },
+      goto_previous_start = {
+        ["hh"] = "@function.outer",
+        ["[["] = "@class.outer",
+      },
+      goto_previous_end = {
+        ["jj"] = "@function.outer",
+        ["[]"] = "@class.outer",
+      },
+    },
   }
 }
 EOF
 let g:python3_host_prog = '/usr/bin/python3'
-"colorscheme hatsunemiku
 let g:moonlight_italic_comments = 1
 let g:moonlight_italic_keywords = 1
 let g:moonlight_italic_functions = 1
@@ -70,8 +116,7 @@ nnoremap <Leader><tab> <cmd>lua require('telescope.builtin').buffers()<CR>
 nnoremap <Leader>d "_d
 nnoremap x "_x
 vnoremap x "_x
-nnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
-inoremap <silent><c-t> <Esc><Cmd>exe v:count1 . "ToggleTerm"<CR>
+nnoremap <silent><c-t> <Cmd>lua require('FTerm').toggle()<CR>
 nnoremap <Leader><leader>p <cmd>lua require'telescope'.extensions.project.project{}<CR>
 nnoremap <Leader><leader>z <cmd>Twilight<CR>
 nnoremap gg gg0
@@ -81,6 +126,10 @@ nnoremap tn <cmd>$tabnew<CR>
 nnoremap t] <cmd>tabn<CR>
 nnoremap t[ <cmd>tabp<CR>
 nnoremap td <cmd>tabclose<CR>
+nnoremap <CR> G
+nnoremap <leader>r <cmd>lua require('spectre').open_visual({select_word=true})<CR>
+nnoremap <leader>ra <cmd>lua require('spectre.actions').run_replace()<CR>
+nnoremap <leader>rc <cmd>lua require('spectre.actions').run_current_replace()<CR>
 
 :nmap <c-s> :w<CR>
 inoremap <Esc> <Esc>lh
@@ -95,7 +144,7 @@ set clipboard+=unnamedplus
 let g:rustfmt_autosave = 1
 filetype plugin indent on
 highlight Blamer guifg=#90EE90 guibg=none
-autocmd BufWritePre *.go lua vim.lsp.buf.formatting()
+autocmd BufWritePre * lua vim.lsp.buf.formatting_sync()
 let g:blamer_enabled = 1
 let g:blamer_delay =400
 set completeopt=menuone,noinsert,noselect
@@ -108,7 +157,7 @@ map  w <Plug>(easymotion-w)
 map  b <Plug>(easymotion-b)
 map  e <Plug>(easymotion-lineforward)
 let g:EasyMotion_smartcase = 1
- let g:EasyMotion_keys='asdf12345qwertgzxcv'
+let g:EasyMotion_keys='1234567890asdfqwegzxc'
 "dap
 nnoremap <silent> <F5> :lua require'dap'.continue()<CR>
 nnoremap <silent> <F10> :lua require'dap'.step_over()<CR>
@@ -197,3 +246,17 @@ set expandtab
 set hls
 
 let g:cursorhold_updatetime = 100
+
+let g:ale_linters = {
+\ 'javascript': ['eslint'],
+\ 'ruby': ['rubocop']
+\}
+
+let g:ale_linters_explicit = 1
+
+" Lint Ruby files with binstub
+let g:ale_ruby_rubocop_executable = '/usr/local/bin/rubocop'
+
+" Let's leave a column for the signs so that the left side of the window doesn't move
+let g:ale_sign_column_always = 1
+:set guicursor=a:blinkon100
