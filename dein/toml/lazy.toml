@@ -332,7 +332,7 @@ cmp.setup.cmdline(':', {
 })
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 local lspconfig = require('lspconfig')
-local servers = { 'gopls', 'hls', 'vuels', 'sqls', 'pyright', 'solargraph', 'typeprof' }
+local servers = { 'gopls', 'hls', 'vuels', 'sqls', 'pyright', 'solargraph', 'typeprof', 'bashls' }
 local navic = require("nvim-navic")
 navic.setup {
     separator = " / ",

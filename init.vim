@@ -144,7 +144,7 @@ set clipboard+=unnamedplus
 let g:rustfmt_autosave = 1
 filetype plugin indent on
 highlight Blamer guifg=#90EE90 guibg=none
-autocmd BufWritePre * lua vim.lsp.buf.formatting_sync()
+autocmd BufWritePre * lua vim.lsp.buf.format()
 let g:blamer_enabled = 1
 let g:blamer_delay =400
 set completeopt=menuone,noinsert,noselect
@@ -259,4 +259,8 @@ let g:ale_ruby_rubocop_executable = '/usr/local/bin/rubocop'
 
 " Let's leave a column for the signs so that the left side of the window doesn't move
 let g:ale_sign_column_always = 1
-:set guicursor=a:blinkon100
+ set guicursor=n-v-c:block,i-ci-ve:ver25,r-cr:hor20,o:hor50
+  \,a:blinkwait700-blinkoff400-blinkon250-Cursor/lCursor
+  \,sm:block-blinkwait175-blinkoff150-blinkon175
+set spelllang=en_us
+set spell
