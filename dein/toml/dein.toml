@@ -8,8 +8,6 @@ repo = 'neovim/nvim-lspconfig'
 [[plugins]]
 repo = 'github/copilot.vim'
 [[plugins]]
-repo = 'APZelos/blamer.nvim'
-[[plugins]]
 repo = 'wakatime/vim-wakatime'
 [[plugins]]
 repo = 'shaunsingh/moonlight.nvim'

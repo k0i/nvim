@@ -1004,22 +1004,6 @@ require'nvim-tree'.setup {
   }
 EOF
 """
-#[[plugins]]
-#repo = "lewis6991/gitsigns.nvim"
-#on_lua = "gitsigns"
-#hook_add = """
-#lua << EOF
-#require('gitsigns').setup{
-# signs = {
-#    add          = {hl = 'GitSignsAdd'   , text = 'a', numhl='GitSignsAddNr'   , linehl='GitSignsAddLn'},
-#    change       = {hl = 'GitSignsChange', text = 'c', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn'},
-#    delete       = {hl = 'GitSignsDelete', text = 'd', numhl='GitSignsDeleteNr', linehl='GitSignsDeleteLn'},
-#    topdelete    = {hl = 'GitSignsDelete', text = 't', numhl='GitSignsDeleteNr', linehl='GitSignsDeleteLn'},
-#    changedelete = {hl = 'GitSignsChange', text = 'e', numhl='GitSignsChangeNr', linehl='GitSignsChangeLn'},
-#  },
-#}
-#EOF
-#"""
 [[plugin]]
 repo = "tamton-aquib/zone.nvim"
 on_lua = "zone"
@@ -1128,6 +1112,27 @@ EOF
 repo="iamcco/markdown-preview.nvim"
 on_ft="markdown"
 build='sh -c "cd app && yarn install"'
+
+[[plugins]]
+repo = "lewis6991/gitsigns.nvim"
+on_event = 'BufEnter'
+hook_source = """
+lua << EOF
+require('gitsigns').setup{
+ current_line_blame = true,
+ on_attach = function(bufnr)
+  local gs = package.loaded.gitsigns
+  local function map(mode, l, r, opts)
+    opts = opts or {}
+    opts.buffer = bufnr
+    vim.keymap.set(mode, l, r, opts)
+  end
+  map('n', '<leader><leader>g', ':Gitsigns setqflist<cr>')
+end
+}
+EOF
+"""
+
 #[[plugins]]
 #repo="norcalli/nvim-colorizer.lua"
 #on_lua="colorizer"
@@ -1136,6 +1141,4 @@ build='sh -c "cd app && yarn install"'
 #require'colorizer'.setup()
 #EOF
 #"""
-#[[plugins]]
-#repo = "dense-analysis/ale"
-#on_ft = ["ruby"]
+
