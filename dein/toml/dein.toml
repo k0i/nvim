@@ -19,4 +19,5 @@ repo = 'simeji/winresizer'
 repo = 'nvim-lua/plenary.nvim'
 [[plugins]]
 repo = 'IMOKURI/line-number-interval.nvim'
-
+[[plugins]]
+repo = 'APZelos/blamer.nvim'
