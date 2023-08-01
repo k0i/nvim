@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/Shougo/denite.nvim/test/rplugin/python3/denite/test_util.py

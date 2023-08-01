@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/neovim/nvim-lspconfig/scripts/README_template.md

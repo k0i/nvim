@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/neovim/nvim-lspconfig/lua/lspconfig/ui/windows.lua

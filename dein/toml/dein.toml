@@ -1,0 +1,25 @@
+[[plugins]]
+repo = 'easymotion/vim-easymotion'
+[[plugins]]
+repo = 'rust-lang/rust.vim'
+on_ft = 'rust'
+[[plugins]]
+repo = 'neovim/nvim-lspconfig'
+[[plugins]]
+repo = 'github/copilot.vim'
+[[plugins]]
+repo = 'APZelos/blamer.nvim'
+[[plugins]]
+repo = 'wakatime/vim-wakatime'
+[[plugins]]
+repo = 'shaunsingh/moonlight.nvim'
+[[plugins]]
+repo = 'ryanoasis/vim-devicons'
+[[plugins]]
+repo = 'simeji/winresizer'
+[[plugins]]
+repo = 'nvim-lua/plenary.nvim'
+[[plugins]]
+repo = 'IMOKURI/line-number-interval.nvim'
+[[plugins]]
+repo = 'nvim-lua/popup.nvim'

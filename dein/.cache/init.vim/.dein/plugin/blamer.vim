@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/APZelos/blamer.nvim/plugin/blamer.vim

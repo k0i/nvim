@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/Shougo/denite.nvim/rplugin/python3/denite/filter/converter/relative_abbr.py

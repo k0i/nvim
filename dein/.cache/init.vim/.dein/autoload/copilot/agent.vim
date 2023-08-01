@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/github/copilot.vim/autoload/copilot/agent.vim

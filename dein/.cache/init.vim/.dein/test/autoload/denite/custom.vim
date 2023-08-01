@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/Shougo/denite.nvim/test/autoload/denite/custom.vim

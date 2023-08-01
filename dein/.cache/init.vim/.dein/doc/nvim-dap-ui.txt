@@ -1,0 +1,1 @@
+/home/koyam/.config/nvim/dein/repos/github.com/rcarriga/nvim-dap-ui/doc/nvim-dap-ui.txt
