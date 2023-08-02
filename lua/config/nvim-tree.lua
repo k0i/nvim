@@ -14,6 +14,10 @@ require("nvim-tree").setup({
 		side = "right",
 		width = 50,
 	},
+   update_focused_file = {
+      enable = true,
+      update_cwd = true,
+  },
 	actions = {
 		open_file = {
 			quit_on_open = true,

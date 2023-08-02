@@ -87,9 +87,9 @@ return {
 			require("config/fterm")
 		end,
 	},
+	"wakatime/vim-wakatime",
 	{
 		"kdheepak/lazygit.nvim",
-		"wakatime/vim-wakatime",
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 		},
@@ -153,66 +153,48 @@ return {
 		},
 	},
 	{
-		"folke/flash.nvim",
-		dependencies = {
-			"nvim-treesitter/nvim-treesitter",
-		},
-		event = "VeryLazy",
-		opts = {
-			{
-				modes = {
-					char = {
-						jump_labels = true,
-					},
-				},
-			},
-		},
-		keys = {
-			{
-				"e",
-				mode = { "n", "o", "x" },
-				function()
-					require("flash").treesitter()
-				end,
-				desc = "Flash Treesitter",
-			},
-			{
-				"r",
-				mode = { "n", "o", "x" },
-				function()
-					require("flash").jump({
-						pattern = ".", -- initialize pattern with any char
-						search = {
-							mode = function(pattern)
-								-- remove leading dot
-								if pattern:sub(1, 1) == "." then
-									pattern = pattern:sub(2)
-								end
-								-- return word pattern and proper skip pattern
-								return ([[\<%s\w*\>]]):format(pattern), ([[\<%s]]):format(pattern)
-							end,
-						},
-						-- select the range
-						jump = { pos = "range" },
-					})
-				end,
-				desc = "Flash Treesitter",
-			},
-			{
-				"r",
-				mode = "o",
-				function()
-					require("flash").remote()
-				end,
-				desc = "Remote Flash",
-			},
-		},
+		"easymotion/vim-easymotion",
+		config = function()
+			require("config/easymotion")
+		end,
 	},
 	{
 		"kylechui/nvim-surround",
 		version = "*",
 		config = function()
 			require("config/surround")
+		end,
+	},
+	{
+		"rcarriga/nvim-notify",
+		config = function()
+			require("config/notify")
+		end,
+	},
+	{
+		"chrisgrieser/nvim-early-retirement",
+		config = true,
+		event = "VeryLazy",
+		opts = {
+			retirementAgeMins = 5,
+		},
+	},
+--	{
+--		"nvim-neotest/neotest",
+--		dependencies = {
+--			"nvim-lua/plenary.nvim",
+--			"nvim-treesitter/nvim-treesitter",
+--			"antoinemadec/FixCursorHold.nvim",
+--			"olimorris/neotest-rspec",
+--		},
+--		config = function()
+--			require("config/neotest")
+--		end,
+--	},
+	{
+		"lukas-reineke/indent-blankline.nvim",
+		config = function()
+			require("config/indentline")
 		end,
 	},
 }

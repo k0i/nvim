@@ -1,6 +1,6 @@
 require("zone").setup({
 	style = "epilepsy",
-	after = 5,
+	after = 8,
 	exclude_filetypes = { "TelescopePrompt", "NvimTree", "neo-tree", "dashboard", "lazy" },
 
 	treadmill = {
