@@ -1,10 +1,11 @@
 require("zone").setup({
-	style = "epilepsy",
+	--style = "epilepsy",
+	style = "treadmill",
 	after = 8,
 	exclude_filetypes = { "TelescopePrompt", "NvimTree", "neo-tree", "dashboard", "lazy" },
 
 	treadmill = {
-		direction = "left",
+		direction = "right",
 		headache = true,
 		tick_time = 30, -- Lower, the faster
 	},

@@ -137,7 +137,7 @@ return {
 	{
 		"tamton-aquib/duck.nvim",
 		config = function()
-			vim.cmd([[autocmd BufEnter * lua require("duck").hatch("🐤")]])
+			vim.cmd([[autocmd BufEnter * lua require("duck").hatch("🐤", 15)]])
 		end,
 	},
 	{
@@ -153,10 +153,41 @@ return {
 		},
 	},
 	{
-		"easymotion/vim-easymotion",
-		config = function()
-			require("config/easymotion")
-		end,
+		"folke/flash.nvim",
+		dependencies = {
+			"nvim-treesitter/nvim-treesitter",
+		},
+		event = "VeryLazy",
+		opts = {
+			{
+				modes = {
+					char = {
+						jump_labels = true,
+					},
+				},
+			},
+		},
+		keys = {
+			{
+				"e",
+				mode = { "n", "o", "x" },
+				function()
+					require("flash").jump({
+						pattern = ".", -- initialize pattern with any char
+						search = {
+							mode = function(pattern)
+								if pattern:sub(1, 1) == "." then
+									pattern = pattern:sub(2)
+								end
+								return ([[\<%s\w*\>]]):format(pattern), ([[\<%s]]):format(pattern)
+							end,
+						},
+						jump = { pos = "range" },
+					})
+				end,
+				desc = "Flash Treesitter",
+			},
+		},
 	},
 	{
 		"kylechui/nvim-surround",
@@ -179,22 +210,43 @@ return {
 			retirementAgeMins = 5,
 		},
 	},
---	{
---		"nvim-neotest/neotest",
---		dependencies = {
---			"nvim-lua/plenary.nvim",
---			"nvim-treesitter/nvim-treesitter",
---			"antoinemadec/FixCursorHold.nvim",
---			"olimorris/neotest-rspec",
---		},
---		config = function()
---			require("config/neotest")
---		end,
---	},
+	{
+		"simrat39/rust-tools.nvim",
+		ft = "rust",
+		config = function()
+			require("config/rust-tools")
+		end,
+	},
 	{
 		"lukas-reineke/indent-blankline.nvim",
 		config = function()
 			require("config/indentline")
 		end,
 	},
+	{
+		"mvllow/modes.nvim",
+		tag = "v0.2.0",
+		config = function()
+			require("config/modes")
+		end,
+	},
+	{
+		"simrat39/symbols-outline.nvim",
+		config = function()
+			require("config/symbols-outline")
+		end,
+	},
+
+	--	{
+	--		"nvim-neotest/neotest",
+	--		dependencies = {
+	--			"nvim-lua/plenary.nvim",
+	--			"nvim-treesitter/nvim-treesitter",
+	--			"antoinemadec/FixCursorHold.nvim",
+	--			"olimorris/neotest-rspec",
+	--		},
+	--		config = function()
+	--			require("config/neotest")
+	--		end,
+	--	},
 }
