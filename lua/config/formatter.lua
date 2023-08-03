@@ -47,6 +47,33 @@ require("formatter").setup({
 				}
 			end,
 		},
+		yaml = {
+			function()
+				return {
+					exe = "python3",
+					args = { "-m", "pyaml" },
+					stdin = true,
+				}
+			end,
+		},
+		json = {
+			function()
+				return {
+					exe = "jq",
+					args = { "." },
+					stdin = true,
+				}
+			end,
+		},
+		markdown = {
+			function()
+				return {
+					exe = "mdformat",
+					args = { "-" },
+					stdin = true,
+				}
+			end,
+		},
 
 		["*"] = {
 			require("formatter.filetypes.any").remove_trailing_whitespace,

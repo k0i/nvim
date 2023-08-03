@@ -236,6 +236,12 @@ return {
 			require("config/symbols-outline")
 		end,
 	},
+	{
+		"HiPhish/rainbow-delimiters.nvim",
+		config = function()
+			require("config/rainbow-delimiters")
+		end,
+	},
 
 	--	{
 	--		"nvim-neotest/neotest",
