@@ -1,6 +1,7 @@
 {
   "BufferTabs.nvim": { "branch": "main", "commit": "e7ee78a2b828e150bf33315a1c74a5e0f6adb6fd" },
   "FTerm.nvim": { "branch": "master", "commit": "d1320892cc2ebab472935242d9d992a2c9570180" },
+  "aurora": { "branch": "master", "commit": "7a3ea3e6747ddd1acbe898e0b4193213aba36b86" },
   "cmp-buffer": { "branch": "main", "commit": "3022dbc9166796b644a841a02de8dd1cc1d311fa" },
   "cmp-cmdline": { "branch": "main", "commit": "8ee981b4a91f536f52add291594e89fb6645e451" },
   "cmp-nvim-lsp": { "branch": "main", "commit": "44b16d11215dce86f253ce0c30949813c0a90765" },
@@ -17,7 +18,6 @@
   "lazygit.nvim": { "branch": "main", "commit": "1578fa3db0a707393d690a2357e7de6a47081ce0" },
   "lualine.nvim": { "branch": "master", "commit": "05d78e9fd0cdfb4545974a5aa14b1be95a86e9c9" },
   "modes.nvim": { "branch": "main", "commit": "3188692abf02a8838ec75e59d68c2ce3e4323f5c" },
-  "moonlight.nvim": { "branch": "pure-lua", "commit": "e24e4218ec680b6396532808abf57ca0ada82e66" },
   "neoscroll.nvim": { "branch": "master", "commit": "d7601c26c8a183fa8994ed339e70c2d841253e93" },
   "nvim-cmp": { "branch": "main", "commit": "c4e491a87eeacf0408902c32f031d802c7eafce8" },
   "nvim-early-retirement": { "branch": "main", "commit": "a35c7488972da70acca376de133f25035c0aa9f0" },

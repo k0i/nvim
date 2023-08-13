@@ -1,20 +1,27 @@
 return {
 	{
-		"shaunsingh/moonlight.nvim",
+		--	"shaunsingh/moonlight.nvim",
+		"ray-x/aurora",
+		lazy = false,
+		priority = 1000,
 		config = function()
-			vim.cmd([[colorscheme moonlight]])
+			vim.cmd([[colorscheme aurora]])
 			vim.cmd([[highlight Normal ctermbg=NONE guibg=NONE]])
 			vim.cmd([[highlight NonText ctermbg=NONE guibg=NONE]])
 			vim.cmd([[highlight LineNr ctermbg=NONE guibg=NONE]])
 			vim.cmd([[highlight Folded ctermbg=NONE guibg=NONE]])
 			vim.cmd([[highlight EndOfBuffer ctermbg=NONE guibg=NONE]])
-			vim.g.moonlight_italic_comments = true
-			vim.g.moonlight_italic_keywords = true
-			vim.g.moonlight_italic_functions = true
-			vim.g.moonlight_italic_variables = false
-			vim.g.moonlight_contrast = true
-			vim.g.moonlight_borders = false
-			vim.g.moonlight_disable_background = false
+			vim.g.aurora_italic = true
+			vim.g.aurora_transparent = true
+			vim.g.aurora_bold = true
+			--		vim.g.aurora_darker = true
+			-- 	vim.g.moonlight_italic_comments = true
+			-- 	vim.g.moonlight_italic_keywords = true
+			-- 	vim.g.moonlight_italic_functions = true
+			-- 	vim.g.moonlight_italic_variables = false
+			-- 	vim.g.moonlight_contrast = true
+			-- 	vim.g.moonlight_borders = false
+			-- 	vim.g.moonlight_disable_background = false
 			vim.api.nvim_set_hl(0, "LineNrAbove", { fg = "#FFFF00" })
 			vim.api.nvim_set_hl(0, "LineNr", { fg = "white" })
 			vim.api.nvim_set_hl(0, "LineNrBelow", { fg = "magenta" })
