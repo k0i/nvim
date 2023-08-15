@@ -180,16 +180,11 @@ return {
 				mode = { "n", "o", "x" },
 				function()
 					require("flash").jump({
-						pattern = ".", -- initialize pattern with any char
-						search = {
-							mode = function(pattern)
-								if pattern:sub(1, 1) == "." then
-									pattern = pattern:sub(2)
-								end
-								return ([[\<%s\w*\>]]):format(pattern), ([[\<%s]]):format(pattern)
-							end,
+						modes = {
+							char = {
+								jump_labels = true,
+							},
 						},
-						jump = { pos = "range" },
 					})
 				end,
 				desc = "Flash Treesitter",
