@@ -135,7 +135,7 @@ local on_attach = function(client, bufnr)
    buf_set_option('omnifunc', 'v:lua.vim.lsp.omnifunc')
    local opts = { noremap = true, silent = true }
     cfg ={
-     hint_prefix = "ПФ 🤔 : ", 
+     hint_prefix = "ПФ 🤔 : ",
      transparency = 30,
    }
    require "lsp_signature".on_attach(cfg,bufnr)
@@ -242,7 +242,7 @@ cmp.setup({
   },
   formatting = {
     format = lspkind.cmp_format({
-      mode = 'symbol', 
+      mode = 'symbol',
       maxwidth = 100,
       before = function (entry, vim_item)
         return vim_item
@@ -280,7 +280,7 @@ cmp.setup.cmdline(':', {
 })
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 local lspconfig = require('lspconfig')
-local servers = { 'gopls', 'hls', 'vuels', 'sqlls', 'pyright', 'sorbet', 'solargraph' }
+local servers = { 'gopls', 'hls', 'vuels', 'sqlls', 'pyright', 'ruby-lsp' }
 local navic = require("nvim-navic")
 navic.setup {
     separator = " / ",
@@ -341,7 +341,7 @@ local on_attach = function(client, bufnr)
    buf_set_keymap("n", "<Leader>s", "<cmd>lua vim.lsp.buf.hover()<CR>", opts)
    buf_set_keymap("n", "<space>f", "<cmd>lua vim.lsp.buf.formatting()<CR>", opts)
    cfg ={
-     hint_prefix = "ПФ 🤔 : ", 
+     hint_prefix = "ПФ 🤔 : ",
      transparency = 30,
    }
    require "lsp_signature".on_attach(cfg,bufnr)
@@ -513,7 +513,7 @@ repo = 'edluffy/specs.nvim'
 on_lua = 'specs'
 hook_add ="""
 lua << EOF
-require('specs').setup{ 
+require('specs').setup{
     show_jumps  = true,
     min_jump = 10,
     popup = {
@@ -810,7 +810,7 @@ local cmp = require'cmp'
     },
   formatting = {
     format = lspkind.cmp_format({
-      mode = 'symbol', 
+      mode = 'symbol',
       maxwidth = 100,
       before = function (entry, vim_item)
         return vim_item
@@ -880,7 +880,7 @@ local cmp = require'cmp'
    buf_set_keymap("n", "<leader>fr", "<cmd>FlutterReload<CR>", opts)
    buf_set_keymap("n", "<space>fq", "<cmd>FlutterQuit<CR>", opts)
    cfg ={
-     hint_prefix = "ПФ 🤔 : ", 
+     hint_prefix = "ПФ 🤔 : ",
      transparency = 30,
    }
    require "lsp_signature".on_attach(cfg,bufnr)
@@ -890,7 +890,7 @@ require('flutter-tools').setup{
     on_attach = on_attach,
     capabilities = capabilities
   },
-  
+
 }
 EOF
 """
@@ -906,8 +906,8 @@ require('neoclip').setup({
           i = {
             paste = '<cr>',
             paste_behind = '<c-k>',
-            replay = '<c-q>',  
-            delete = '<c-d>',  
+            replay = '<c-q>',
+            delete = '<c-d>',
             custom = {},
           },
           n = {

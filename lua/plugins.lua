@@ -221,6 +221,8 @@ return {
 	},
 	{
 		"lukas-reineke/indent-blankline.nvim",
+		main = "ibl",
+		opts = {},
 		config = function()
 			require("config/indentline")
 		end,
@@ -242,6 +244,13 @@ return {
 		"HiPhish/rainbow-delimiters.nvim",
 		config = function()
 			require("config/rainbow-delimiters")
+		end,
+	},
+	{
+		"FabianWirth/search.nvim",
+		dependencies = { "nvim-telescope/telescope.nvim" },
+		config = function()
+			require("config/search")
 		end,
 	},
 

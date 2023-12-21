@@ -1,4 +1,3 @@
-vim.o.encofing = "utf-8"
 vim.scriptencoding = "utf-8"
 
 vim.o.tabstop = 2
@@ -81,6 +80,6 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 vim.g.mapleader = " "
-vim.g.lsp_servers = { "pyright", "rust_analyzer", "tsserver", "clangd", "cmake", "solargraph" }
+vim.g.lsp_servers = { "pyright", "rust_analyzer", "tsserver", "clangd", "cmake", "ruby-lsp" }
 
 require("lazy_load")
