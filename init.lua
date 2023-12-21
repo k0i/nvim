@@ -52,6 +52,11 @@ vim.api.nvim_set_keymap("n", "td", ":tabclose<CR>", { noremap = true })
 vim.api.nvim_set_keymap("n", "t]", ":tabnext<CR>", { noremap = true })
 vim.api.nvim_set_keymap("n", "t[", ":tabprevious<CR>", { noremap = true })
 vim.api.nvim_set_hl(0, "LineNr", { fg = "#00FFFF" })
+vim.api.nvim_create_autocmd("BufWritePost", {
+	callback = function()
+		vim.lsp.buf.format()
+	end,
+})
 
 vim.cmd([[
   augroup YankHighlight

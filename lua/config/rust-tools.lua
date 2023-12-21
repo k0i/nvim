@@ -6,5 +6,20 @@ rt.setup({
 			vim.keymap.set("n", "<leader>s", rt.hover_actions.hover_actions, { buffer = bufnr })
 			vim.keymap.set("n", "<Leader>a", rt.code_action_group.code_action_group, { buffer = bufnr })
 		end,
+		settings = {
+			["rust-analyzer"] = {
+				cargo = {
+					features = "all",
+				},
+				checkOnSave = true,
+				check = {
+					command = "clippy",
+					features = "all",
+				},
+				procMacro = {
+					enable = true,
+				},
+			},
+		},
 	},
 })
