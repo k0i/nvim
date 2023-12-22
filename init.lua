@@ -27,7 +27,6 @@ vim.o.ttimeoutlen = 50
 vim.o.undofile = true
 vim.o.undodir = vim.fn.stdpath("cache") .. "/undo"
 
-vim.o.foldmethod = "marker"
 vim.o.splitright = true
 vim.o.relativenumber = true
 vim.o.splitbelow = true

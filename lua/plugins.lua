@@ -251,4 +251,11 @@ return {
 			require("config/navigator")
 		end,
 	},
+	{
+		"kevinhwang91/nvim-ufo",
+		dependencies = { "kevinhwang91/promise-async", "neovim/nvim-lspconfig" },
+		config = function()
+			require("config/ufo")
+		end,
+	},
 }
