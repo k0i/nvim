@@ -52,12 +52,11 @@ cmp.setup.cmdline(":", {
 })
 
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
--- require('lspconfig')['<YOUR_LSP_SERVER>'].setup {
---    capabilities = capabilities
--- }
-lspconfig = require("lspconfig")
-for _, lsp in ipairs(vim.g.lsp_servers) do
-	lspconfig[lsp].setup({
-		capabilities = capabilities,
-	})
-end
+local lspconfig = require("lspconfig")
+
+lspconfig.tsserver.setup({
+	capabilities = capabilities,
+})
+lspconfig.solargraph.setup({
+	capabilities = capabilities,
+})

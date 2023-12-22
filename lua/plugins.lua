@@ -1,11 +1,10 @@
 return {
 	{
-		--	"shaunsingh/moonlight.nvim",
-		"ray-x/aurora",
+		"shaunsingh/moonlight.nvim",
 		lazy = false,
 		priority = 1000,
 		config = function()
-			vim.cmd([[colorscheme aurora]])
+			vim.cmd([[colorscheme moonlight]])
 			vim.cmd([[highlight Normal ctermbg=NONE guibg=NONE]])
 			vim.cmd([[highlight NonText ctermbg=NONE guibg=NONE]])
 			vim.cmd([[highlight LineNr ctermbg=NONE guibg=NONE]])
@@ -14,14 +13,13 @@ return {
 			vim.g.aurora_italic = true
 			vim.g.aurora_transparent = true
 			vim.g.aurora_bold = true
-			--		vim.g.aurora_darker = true
-			-- 	vim.g.moonlight_italic_comments = true
-			-- 	vim.g.moonlight_italic_keywords = true
-			-- 	vim.g.moonlight_italic_functions = true
-			-- 	vim.g.moonlight_italic_variables = false
-			-- 	vim.g.moonlight_contrast = true
-			-- 	vim.g.moonlight_borders = false
-			-- 	vim.g.moonlight_disable_background = false
+			vim.g.moonlight_italic_comments = true
+			vim.g.moonlight_italic_keywords = true
+			vim.g.moonlight_italic_functions = true
+			vim.g.moonlight_italic_variables = false
+			vim.g.moonlight_contrast = true
+			vim.g.moonlight_borders = false
+			vim.g.moonlight_disable_background = true
 			vim.api.nvim_set_hl(0, "LineNrAbove", { fg = "#FFFF00" })
 			vim.api.nvim_set_hl(0, "LineNr", { fg = "white" })
 			vim.api.nvim_set_hl(0, "LineNrBelow", { fg = "magenta" })
@@ -69,10 +67,6 @@ return {
 		config = function()
 			require("config/treesitter")
 		end,
-	},
-	{
-		"nvim-treesitter/nvim-treesitter-textobjects",
-		dependencies = { "nvim-treesitter/nvim-treesitter" },
 	},
 	{
 		"nvim-telescope/telescope.nvim",
@@ -215,6 +209,9 @@ return {
 	{
 		"simrat39/rust-tools.nvim",
 		ft = "rust",
+		dependencies = {
+			"ray-x/navigator.lua",
+		},
 		config = function()
 			require("config/rust-tools")
 		end,
@@ -222,10 +219,6 @@ return {
 	{
 		"lukas-reineke/indent-blankline.nvim",
 		main = "ibl",
-		opts = {},
-		config = function()
-			require("config/indentline")
-		end,
 	},
 	{
 		"mvllow/modes.nvim",
@@ -235,13 +228,8 @@ return {
 		end,
 	},
 	{
-		"simrat39/symbols-outline.nvim",
-		config = function()
-			require("config/symbols-outline")
-		end,
-	},
-	{
 		"HiPhish/rainbow-delimiters.nvim",
+		dependencies = { "lukas-reineke/indent-blankline.nvim" },
 		config = function()
 			require("config/rainbow-delimiters")
 		end,
@@ -253,17 +241,14 @@ return {
 			require("config/search")
 		end,
 	},
-
-	--	{
-	--		"nvim-neotest/neotest",
-	--		dependencies = {
-	--			"nvim-lua/plenary.nvim",
-	--			"nvim-treesitter/nvim-treesitter",
-	--			"antoinemadec/FixCursorHold.nvim",
-	--			"olimorris/neotest-rspec",
-	--		},
-	--		config = function()
-	--			require("config/neotest")
-	--		end,
-	--	},
+	{
+		"ray-x/navigator.lua",
+		dependencies = {
+			{ "ray-x/guihua.lua", build = "cd lua/fzy && make" },
+			{ "neovim/nvim-lspconfig" },
+		},
+		config = function()
+			require("config/navigator")
+		end,
+	},
 }
