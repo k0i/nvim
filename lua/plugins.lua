@@ -138,7 +138,7 @@ return {
 	{
 		"tamton-aquib/duck.nvim",
 		config = function()
-			vim.cmd([[autocmd BufEnter * lua require("duck").hatch("🐤", 15)]])
+			vim.cmd([[autocmd BufEnter * lua require("duck").hatch("🤔", 15)]])
 		end,
 	},
 	{
@@ -256,6 +256,22 @@ return {
 		dependencies = { "kevinhwang91/promise-async", "neovim/nvim-lspconfig" },
 		config = function()
 			require("config/ufo")
+		end,
+	},
+	{
+		"ray-x/sad.nvim",
+		dependencies = {
+			{ "ray-x/guihua.lua", build = "cd lua/fzy && make" },
+		},
+		config = function()
+			require("sad").setup({})
+		end,
+	},
+	{
+		"startup-nvim/startup.nvim",
+		dependencies = { "nvim-telescope/telescope.nvim", "nvim-lua/plenary.nvim" },
+		config = function()
+			require("startup").setup(require("config/startup_theme"))
 		end,
 	},
 }

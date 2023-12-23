@@ -84,6 +84,5 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 vim.g.mapleader = " "
---vim.g.lsp_servers = { "pyright", "rust_analyzer", "tsserver", "clangd", "cmake", "solargraph" }
 
 require("lazy_load")
